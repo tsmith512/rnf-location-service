@@ -1,6 +1,6 @@
 import { Router } from 'itty-router';
 
-import { HelloWorld } from './handlers/HelloWorld';
+import { HelloWorld } from './handlers';
 
 const router = Router();
 
