@@ -107,23 +107,48 @@ Returns a standard single waypoint object that is the closest to (earlier _or_ l
 
 # Group Trips
 
-Trips are manually created time-bound pieces of the location history.
+Trips are manually created time-bound metadata to collect a series of Waypoints.
 
-## Location History as GeoJSON [/api/location/history/{type}]
+## Trips Index [/trips]
+
+### Get list of Trips [GET]
+
+Returns an array of all trip objects **without** the GeoJSON `line` property.
+
++ Response 200 (application/json)
+    + Attributes (array[Trip])
+
+## Trip Details [/trips/{id}]
+
+### Get Trip details [GET]
+
+Get details about a particular trip, **including** the GeoJSON `line` property of coordinates within the trip's bounding timestamps.
 
 + Parameters
+    + id (required, intiger, `2`) ... A trip ID
 
-    + type (required, string, `line`) ... Either `line` or `points`.
++ Response 200 (application/json)
+    + Attributes (Trip)
 
-### Get location history as a GeoJSON object [GET]
++ Response 404 (text/plain)
+
+    + Body
+
+            Not Found: Trip ID not found
+
+# Group History
+
+## Full History [/history]
+
+### Full history as a line [GET /history/line]
+
+**For a `line` request:** A GeoJSON `LineString`. The coordinates array may be very long. All rows will be returned.
 
 + Request
     + Parameters
         + type: line
 
 + Response 200 (application/json)
-
-    **For a `line` request:** A GeoJSON `LineString`. The coordinates array may be very long. All rows will be returned.
 
     + Body
 
@@ -145,15 +170,12 @@ Trips are manually created time-bound pieces of the location history.
                 ]
             }
 
-+ Request
-    + Parameters
-        + type: points
+### Full history as a collection of Points [GET]
+
+**For a `points` request:** A GeoJSON collection of `Features`, each of which is a `Point`. All rows will be returned.
 
 + Response 200 (application/json)
-
-    **For a `points` request:** A GeoJSON collection of `Features`, each of which is a `Point`. All rows will be returned.
-
-    + Body
+ an    + Body
 
             {
                 "type": "FeatureCollection",
@@ -181,90 +203,9 @@ Trips are manually created time-bound pieces of the location history.
                 ]
             }
 
+# Group Stats
 
-## Trips Index [/api/trips]
-
-### Get list of trips [GET]
-
-+ Response 200 (application/json)
-
-    Returns an array of all trips as trip metadata objects _without_ the GeoJSON `line` property.
-
-    + Body
-
-            [
-                {
-                    "id": 1,
-                    "machine_name": "pacific_coast_roadtrip",
-                    "starttime": 1440783004,
-                    "endtime": 1442329222,
-                    "label": "Pacific Coast Roadtrip"
-                },
-                {
-                    "id": 2,
-                    "machine_name": "scottish_roadtrip",
-                    "starttime": 1460910603,
-                    "endtime": 1461357013,
-                    "label": "Scottish Roadtrip"
-                },
-                {
-                    "id": 3,
-                    "machine_name": "west_texas_adventure",
-                    "starttime": 1484346602,
-                    "endtime": 1484605808,
-                    "label": "Big Bend / West Texas Adventure"
-                }
-            ]
-
-## Trip Details [/api/trips/{id}]
-
-Get details about a particular trip.
-
-+ Parameters
-
-    + id (required, intiger, `2`) ... A trip `id`
-
-### Get trip history as GeoJSON line [GET]
-
-+ Response 200 (application/json)
-
-    A trip metadata object, containing the trip route as a GeoJSON `LineString` as the `line` property of the object. Only rows within the trip's bounding timestamps will be returned.
-
-    + Body
-
-            {
-                "id": 2,
-                "machine_name": "scottish_roadtrip",
-                "starttime": 1460910603,
-                "endtime": 1461357013,
-                "label": "Scottish Roadtrip",
-                "line": {
-                    "type": "LineString",
-                    "properties": {
-                        "stroke": "#FF6633",
-                        "stroke-width": 2
-                    },
-                    "coordinates": [
-                        [
-                        -3.36606203,
-                        55.94628242
-                        ],
-                        [
-                        -3.36276348,
-                        55.94840873
-                        ]
-                    ]
-                }
-            }
-
-+ Response 404 (text/plain)
-
-    The requested trip `id` was not found.
-
-    + Body
-
-            Not Found: Trip ID not found
-
+_TBD_
 
 # Data Structures
 
