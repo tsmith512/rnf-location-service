@@ -1,10 +1,24 @@
 FORMAT: 1A
 HOST: http://www.example.com/
 
-# Location Tracker v1
+# Location Tracker v2
 
-A simple location tracker which accepts updates from Tasker for Android and
-provides data through an API built on Silex.
+Rebuild of the original Location Tracker service for Route Not Found. With, hopefully, a cleaner API.
+
+Primary Inputs:
+
+- Location waypoints from Tasker
+- Trip information from TBD backend admin
+
+Primary Outputs:
+
+- Waypoint and trip data for WordPress
+- Debug and stats info for TBD backend admin
+
+Data:
+
+- A `waypoint` is a specific geographic location with a timestamp and, optionally, geocoded information
+- A `trip` is a date range and a name which collects waypoints
 
 # Group Recording Updates
 
