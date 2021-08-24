@@ -1,3 +1,9 @@
-export async function handleRequest(request: Request): Promise<Response> {
-  return new Response(`request method: ${request.method}`)
-}
+import { Router } from 'itty-router';
+
+import { HelloWorld } from './handlers/HelloWorld';
+
+const router = Router();
+
+router.get('*', HelloWorld);
+
+export const handleRequest = (request: Request) => router.handle(request);
