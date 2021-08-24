@@ -20,25 +20,25 @@ Data:
 - A `waypoint` is a specific geographic location with a timestamp and, optionally, geocoded information
 - A `trip` is a date range and a name which collects waypoints
 
-# Group Recording Updates
+# Group Waypoints
 
-## Update Location [/api/location{?key}]
+## Create Waypoint [/waypoint?key={key}]
 
-+ Parameters
+### Create Waypoint [POST]
 
-    + key (required, string, `API-KEY`) ... API Key defined in application config at `config.yml`
-
-### Write one or more check-ins [POST]
+**I want to completely change this. This method is still v1.**
 
 Updates should be queued client-side and submitted as a plain-text CSV file. Your API key must be submitted as a query argument; the CSV text goes in the body of the request.
 
 There is a Tasker task template in the repository in the `/tasker` directory to do this.
 
-+ Request (text/plain)
++ Parameters
+    + key (required, string, `API-KEY`) ... API Key defined in application config at `config.yml`
 
++ Request (text/plain)
     + Attributes (object)
         + date: `1-12-17` (string) - A human readable date marker; is ignored by parsing but useful for manual adjustment of queue files
-        + time: `1484250000` (number) - Unix timestamp. This is a unique value.
+        + time: `1484250000` (number) - Unix timestamp.
         + lat: `30.123` (number) - Latitude
         + lon: `-95.123` (number) - Longitude
 
@@ -67,8 +67,6 @@ There is a Tasker task template in the repository in the `/tasker` directory to 
 
     A row in the data wasn't properly formatted and couldn't be parsed. Client should correct the payload and resubmit.
 
-    **@TODO:** Previous rows may have been processed properly, ideally client should drop _those_ from the queue and not resubmit. But there isn't a way to compare yet. Workaround: timestamps are unique in the database at this point, so a resubmission of an identical row would just replace it.
-
     + Body
 
             Bad Request: Row contained malformed coordinates
@@ -81,34 +79,35 @@ There is a Tasker task template in the repository in the `/tasker` directory to 
 
             Unauthorized
 
-# Group Retrieving History
 
-## Latest Location [/api/location/latest]
+## Latest Waypoint [/waypoint]
 
-### Get latest check-in [GET]
+### Get Recent Waypoint [GET]
+
+Get the most recent waypoint available.
 
 + Response 200 (application/json)
 
-    A standard single location object.
+    + Attributes (Waypoint)
 
-    + Attributes (object)
-        + full_city: "Austin, TX, US" (string) - Geocoded city, state, and country
-        + city: "Austin" (string) - Geocoded city name
-        + time: `1484697627` (number) - Unix timestamp
-        + lat: `30.275` (number) - Latitude
-        + lon: `-97.740` (number) - Longitude
-        + trips: `Array` (array) - Array of any trips for this timestamp
+## Waypoint at Time [/waypoint/{time}]
 
-    + Body
++ Parameters
 
-            {
-                "full_city": "Austin, TX, US",
-                "city": "Austin",
-                "time": 1484697627,
-                "lat": 30.275,
-                "lon": -97.740,
-                "trips": [...]
-            }
+    + time (required, intiger, `1492536130`) ... A unix timestamp
+
+### Get check-in by time [GET]
+
+Returns a standard single waypoint object that is the closest to (earlier _or_ later) the requested time.
+
+
++ Response 200 (application/json)
+    + Attributes (Waypoint)
+
+
+# Group Trips
+
+Trips are manually created time-bound pieces of the location history.
 
 ## Location History as GeoJSON [/api/location/history/{type}]
 
@@ -182,42 +181,6 @@ There is a Tasker task template in the repository in the `/tasker` directory to 
                 ]
             }
 
-## Location by Time [/api/location/timestamp/{time}]
-
-+ Parameters
-
-    + time (required, intiger, `1492536130`) ... A unix timestamp
-
-### Get check-in by time [GET]
-
-+ Response 200 (application/json)
-
-    Returns a standard single location object that is the closest to the requested time.
-
-    Response may be before or after the requested time, deterined by lowest absolute value of the difference between the `time` parameter and the rows of recorded history.
-
-    + Attributes (object)
-        + full_city: "Austin, TX, US" (string) - Geocoded city, state, and country
-        + city: "Austin" (string) - Geocoded city name
-        + time: `1484697627` (number) - Unix timestamp
-        + lat: `30.275` (number) - Latitude
-        + lon: `-97.740` (number) - Longitude
-        + trips: `Array` (array) - Array of any trips for this timestamp
-
-    + Body
-
-            {
-                "full_city": "Austin, TX, US",
-                "city": "Austin",
-                "time": 1484697627,
-                "lat": 30.275,
-                "lon": -97.740,
-                "trips": [...]
-            }
-
-# Group Retrieving Trips
-
-Trips are manually created time-bound pieces of the location history.
 
 ## Trips Index [/api/trips]
 
@@ -301,3 +264,24 @@ Get details about a particular trip.
     + Body
 
             Not Found: Trip ID not found
+
+
+# Data Structures
+
+## Waypoint (object)
+
++ time: `1484697627` (number) - Unix timestamp
++ lat: `30.275` (number) - Latitude
++ lon: `-97.740` (number) - Longitude
++ city: `Austin` (string) - Geocoded city, if any
++ full_city: `Austin, TX, US` (string) - DEPRECATED: "City, ST, C"
++ trips (array[Trip]) - Array of trips containing this Waypoint
+
+## Trip (object)
+
++ id: `1` (number) - Trip ID
++ label: `Pacific Coast Roadtrip` (string) - Presentable trip title
++ slug: `pacific_coast_roadtrip` (string) - Slugified trip title
++ starttime: `1440783004` (number) - Unix timestamp for trip start
++ endtime: `1442329222` (number) - Unix timestamp for trip end
++ line (object) - GeoJSON trip line
