@@ -1,0 +1,289 @@
+FORMAT: 1A
+HOST: http://www.example.com/
+
+# Location Tracker v1
+
+A simple location tracker which accepts updates from Tasker for Android and
+provides data through an API built on Silex.
+
+# Group Recording Updates
+
+## Update Location [/api/location{?key}]
+
++ Parameters
+
+    + key (required, string, `API-KEY`) ... API Key defined in application config at `config.yml`
+
+### Write one or more check-ins [POST]
+
+Updates should be queued client-side and submitted as a plain-text CSV file. Your API key must be submitted as a query argument; the CSV text goes in the body of the request.
+
+There is a Tasker task template in the repository in the `/tasker` directory to do this.
+
++ Request (text/plain)
+
+    + Attributes (object)
+        + date: `1-12-17` (string) - A human readable date marker; is ignored by parsing but useful for manual adjustment of queue files
+        + time: `1484250000` (number) - Unix timestamp. This is a unique value.
+        + lat: `30.123` (number) - Latitude
+        + lon: `-95.123` (number) - Longitude
+
+    + Body
+
+            1-12-17,1484250000,30.123,-95.123
+            1-12-18,1484260000,30.456,-95.456
+
++ Response 201 (text/plain)
+
+    Records were successfully entered into the database; client may clear its upload queue.
+
+    + Body
+
+            Location recorded.
+
++ Response 200 (text/plain)
+
+    The data were correctly formatted and parsed, but was not correctly recorded in the database. Client should retain the payload and include it in the next update submission.
+
+    + Body
+
+            Location received.
+
++ Response 400 (text/plain)
+
+    A row in the data wasn't properly formatted and couldn't be parsed. Client should correct the payload and resubmit.
+
+    **@TODO:** Previous rows may have been processed properly, ideally client should drop _those_ from the queue and not resubmit. But there isn't a way to compare yet. Workaround: timestamps are unique in the database at this point, so a resubmission of an identical row would just replace it.
+
+    + Body
+
+            Bad Request: Row contained malformed coordinates
+
++ Response 403 (text/plain)
+
+    The API key must be provided as a query argument.
+
+    + Body
+
+            Unauthorized
+
+# Group Retrieving History
+
+## Latest Location [/api/location/latest]
+
+### Get latest check-in [GET]
+
++ Response 200 (application/json)
+
+    A standard single location object.
+
+    + Attributes (object)
+        + full_city: "Austin, TX, US" (string) - Geocoded city, state, and country
+        + city: "Austin" (string) - Geocoded city name
+        + time: `1484697627` (number) - Unix timestamp
+        + lat: `30.275` (number) - Latitude
+        + lon: `-97.740` (number) - Longitude
+        + trips: `Array` (array) - Array of any trips for this timestamp
+
+    + Body
+
+            {
+                "full_city": "Austin, TX, US",
+                "city": "Austin",
+                "time": 1484697627,
+                "lat": 30.275,
+                "lon": -97.740,
+                "trips": [...]
+            }
+
+## Location History as GeoJSON [/api/location/history/{type}]
+
++ Parameters
+
+    + type (required, string, `line`) ... Either `line` or `points`.
+
+### Get location history as a GeoJSON object [GET]
+
++ Request
+    + Parameters
+        + type: line
+
++ Response 200 (application/json)
+
+    **For a `line` request:** A GeoJSON `LineString`. The coordinates array may be very long. All rows will be returned.
+
+    + Body
+
+            {
+                "type": "LineString",
+                "properties": {
+                    "stroke": "#FF6633",
+                    "stroke-width": 2
+                },
+                "coordinates": [
+                    [
+                        -97.740,
+                        30.275
+                    ],
+                    [
+                        -97.740,
+                        30.275
+                    ]
+                ]
+            }
+
++ Request
+    + Parameters
+        + type: points
+
++ Response 200 (application/json)
+
+    **For a `points` request:** A GeoJSON collection of `Features`, each of which is a `Point`. All rows will be returned.
+
+    + Body
+
+            {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                -97.740,
+                                30.275
+                            ]
+                        }
+                    },
+                    {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                -97.740,
+                                30.275
+                            ]
+                        }
+                    }
+                ]
+            }
+
+## Location by Time [/api/location/timestamp/{time}]
+
++ Parameters
+
+    + time (required, intiger, `1492536130`) ... A unix timestamp
+
+### Get check-in by time [GET]
+
++ Response 200 (application/json)
+
+    Returns a standard single location object that is the closest to the requested time.
+
+    Response may be before or after the requested time, deterined by lowest absolute value of the difference between the `time` parameter and the rows of recorded history.
+
+    + Attributes (object)
+        + full_city: "Austin, TX, US" (string) - Geocoded city, state, and country
+        + city: "Austin" (string) - Geocoded city name
+        + time: `1484697627` (number) - Unix timestamp
+        + lat: `30.275` (number) - Latitude
+        + lon: `-97.740` (number) - Longitude
+        + trips: `Array` (array) - Array of any trips for this timestamp
+
+    + Body
+
+            {
+                "full_city": "Austin, TX, US",
+                "city": "Austin",
+                "time": 1484697627,
+                "lat": 30.275,
+                "lon": -97.740,
+                "trips": [...]
+            }
+
+# Group Retrieving Trips
+
+Trips are manually created time-bound pieces of the location history.
+
+## Trips Index [/api/trips]
+
+### Get list of trips [GET]
+
++ Response 200 (application/json)
+
+    Returns an array of all trips as trip metadata objects _without_ the GeoJSON `line` property.
+
+    + Body
+
+            [
+                {
+                    "id": 1,
+                    "machine_name": "pacific_coast_roadtrip",
+                    "starttime": 1440783004,
+                    "endtime": 1442329222,
+                    "label": "Pacific Coast Roadtrip"
+                },
+                {
+                    "id": 2,
+                    "machine_name": "scottish_roadtrip",
+                    "starttime": 1460910603,
+                    "endtime": 1461357013,
+                    "label": "Scottish Roadtrip"
+                },
+                {
+                    "id": 3,
+                    "machine_name": "west_texas_adventure",
+                    "starttime": 1484346602,
+                    "endtime": 1484605808,
+                    "label": "Big Bend / West Texas Adventure"
+                }
+            ]
+
+## Trip Details [/api/trips/{id}]
+
+Get details about a particular trip.
+
++ Parameters
+
+    + id (required, intiger, `2`) ... A trip `id`
+
+### Get trip history as GeoJSON line [GET]
+
++ Response 200 (application/json)
+
+    A trip metadata object, containing the trip route as a GeoJSON `LineString` as the `line` property of the object. Only rows within the trip's bounding timestamps will be returned.
+
+    + Body
+
+            {
+                "id": 2,
+                "machine_name": "scottish_roadtrip",
+                "starttime": 1460910603,
+                "endtime": 1461357013,
+                "label": "Scottish Roadtrip",
+                "line": {
+                    "type": "LineString",
+                    "properties": {
+                        "stroke": "#FF6633",
+                        "stroke-width": 2
+                    },
+                    "coordinates": [
+                        [
+                        -3.36606203,
+                        55.94628242
+                        ],
+                        [
+                        -3.36276348,
+                        55.94840873
+                        ]
+                    ]
+                }
+            }
+
++ Response 404 (text/plain)
+
+    The requested trip `id` was not found.
+
+    + Body
+
+            Not Found: Trip ID not found
