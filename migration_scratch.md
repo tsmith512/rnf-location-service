@@ -16,6 +16,14 @@ geocode_attempts,
 NULL AS geocode_raw_response
 FROM location_history;
 
+SELECT
+id,
+label,
+machine_name AS 'slug',
+CONCAT("to_timestamp(", `starttime`, ")") AS 'start',
+CONCAT("to_timestamp(", `endtime`, ")") AS 'end'
+FROM trips;
+
 ```
 
 Notes:
@@ -23,6 +31,7 @@ Notes:
 - Remove the quotes that MySQL is gonna put in that `timestamp` column; that is an expresstion for psql to evaluate
 - geocode_raw_response in v1 is stored as a PHP serialized associative array from a different library, so that's gonna have to go.
 - I want to change `full_city` because it doesn't work well for rural locations. Recode everything?
+- **Warning** `to_timestamp` returns `timestamp WITH time zone` which is not the logic I'm working on. Server time is UTC
 
 ## v2 Queries
 
@@ -50,3 +59,43 @@ ORDER BY timestamp DESC
 LIMIT 1;
 
 ```
+
+For `/waypoint/{time}`
+
+Except that this is kinda shitty for a number of reasons.
+
+``` sql
+
+SELECT *,
+extract(epoch from timestamp) AS unixtimestamp,
+abs(extract(epoch from timestamp) - 1598733000) AS diff
+FROM waypoints
+ORDER BY diff
+LIMIT 1;
+
+```
+
+## Random Stuff
+
+Well this makes a GeoJSON line
+
+``` sql
+
+SELECT ST_AsGeoJSON(ST_MakeLine(waypoints.point::geometry ORDER BY timestamp))::jsonb as line
+FROM waypoints;
+
+```
+
+And this would aggregate a GeoJSON line for the trip
+
+``` sql
+
+SELECT trips.*, ST_AsGeoJSON(ST_MakeLine(waypoints.point::geometry ORDER BY timestamp))::jsonb AS line
+FROM trips
+LEFT JOIN waypoints
+ON waypoints.timestamp between trips.start and trips.end
+GROUP BY trips.id
+
+```
+
+Would probably only want to grab one at a time.

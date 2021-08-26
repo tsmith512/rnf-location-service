@@ -76,8 +76,8 @@ CREATE TABLE public.trips (
     id integer NOT NULL,
     label text,
     slug character varying(50),
-    starttime timestamp without time zone NOT NULL,
-    endtime timestamp without time zone NOT NULL
+    start timestamp without time zone NOT NULL,
+    "end" timestamp without time zone NOT NULL
 );
 
 
