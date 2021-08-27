@@ -1,5 +1,5 @@
 FORMAT: 1A
-HOST: http://www.example.com/
+HOST: http://www.example.com/v2
 
 # Location Tracker v2
 
@@ -80,7 +80,7 @@ There is a Tasker task template in the repository in the `/tasker` directory to 
             Unauthorized
 
 
-## Latest Waypoint [/waypoint]
+## Latest Waypoint [/waypoint/latest]
 
 ### Get Recent Waypoint [GET]
 
@@ -175,7 +175,7 @@ Get details about a particular trip, **including** the GeoJSON `line` property o
 **For a `points` request:** A GeoJSON collection of `Features`, each of which is a `Point`. All rows will be returned.
 
 + Response 200 (application/json)
- an    + Body
+    + Body
 
             {
                 "type": "FeatureCollection",
@@ -211,11 +211,10 @@ _TBD_
 
 ## Waypoint (object)
 
-+ time: `1484697627` (number) - Unix timestamp
-+ lat: `30.275` (number) - Latitude
++ timestamp: `1484697627` (number) - Unix timestamp
 + lon: `-97.740` (number) - Longitude
 + city: `Austin` (string) - Geocoded city, if any
-+ full_city: `Austin, TX, US` (string) - DEPRECATED: "City, ST, C"
++ admin: `Austin, TX, US` (string) - Most specific available place name
 + trips (array[Trip]) - Array of trips containing this Waypoint
 
 ## Trip (object)
@@ -223,6 +222,6 @@ _TBD_
 + id: `1` (number) - Trip ID
 + label: `Pacific Coast Roadtrip` (string) - Presentable trip title
 + slug: `pacific_coast_roadtrip` (string) - Slugified trip title
-+ starttime: `1440783004` (number) - Unix timestamp for trip start
-+ endtime: `1442329222` (number) - Unix timestamp for trip end
++ start: `1440783004` (number) - Unix timestamp for trip start
++ end: `1442329222` (number) - Unix timestamp for trip end
 + line (object) - GeoJSON trip line
