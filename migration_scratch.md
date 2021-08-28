@@ -8,20 +8,19 @@ Transforms and queries for the v1-MySQL to v2-PostgreSQL
 
 SELECT
 id,
-CONCAT("to_timestamp(", `time`, ")") AS 'timestamp',
+`time` AS 'timestamp',
 CONCAT("POINT(", lon, " ", lat, ")") AS `point`,
 city,
 full_city AS admin,
-geocode_attempts,
-NULL AS geocode_raw_response
+geocode_attempts
 FROM location_history;
 
 SELECT
 id,
 label,
 machine_name AS 'slug',
-CONCAT("to_timestamp(", `starttime`, ")") AS 'start',
-CONCAT("to_timestamp(", `endtime`, ")") AS 'end'
+`starttime` AS 'start',
+`endtime` AS 'end'
 FROM trips;
 
 ```
@@ -48,7 +47,7 @@ For `/waypoint/latest`
 ``` sql
 
 SELECT
-  EXTRACT(EPOCH FROM timestamp) AS "timestamp",
+  timestamp,
   ST_X(point::geometry) AS "lon",
   ST_Y(point::geometry) AS "lat",
   city,
@@ -67,8 +66,8 @@ Except that this is kinda shitty for a number of reasons.
 ``` sql
 
 SELECT *,
-extract(epoch from timestamp) AS unixtimestamp,
-abs(extract(epoch from timestamp) - 1598733000) AS diff
+abs(timestamp - 1598733000) AS diff,
+to_timestamp(timestamp)
 FROM waypoints
 ORDER BY diff
 LIMIT 1;

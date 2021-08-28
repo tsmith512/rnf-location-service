@@ -75,9 +75,9 @@ SET default_with_oids = false;
 CREATE TABLE public.trips (
     id integer NOT NULL,
     label text,
-    slug character varying(50),
-    start timestamp without time zone NOT NULL,
-    "end" timestamp without time zone NOT NULL
+    slug character varying(50) NOT NULL,
+    start integer NOT NULL,
+    "end" integer NOT NULL
 );
 
 
@@ -106,8 +106,8 @@ ALTER SEQUENCE public.trips_id_seq OWNED BY public.trips.id;
 --
 
 CREATE TABLE public.waypoints (
-    id bigint NOT NULL,
-    "timestamp" timestamp without time zone NOT NULL,
+    id integer NOT NULL,
+    "timestamp" integer DEFAULT date_part('epoch'::text, CURRENT_TIMESTAMP) NOT NULL,
     point public.geography NOT NULL,
     city text,
     admin text,
