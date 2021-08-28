@@ -166,6 +166,16 @@ ALTER TABLE ONLY public.waypoints
 
 
 --
+-- Name: TABLE spatial_ref_sys; Type: ACL; Schema: public; Owner: -
+--
+
+REVOKE ALL ON TABLE public.spatial_ref_sys FROM postgres;
+REVOKE SELECT ON TABLE public.spatial_ref_sys FROM PUBLIC;
+GRANT ALL ON TABLE public.spatial_ref_sys TO rnf;
+GRANT SELECT ON TABLE public.spatial_ref_sys TO PUBLIC;
+
+
+--
 -- PostgreSQL database dump complete
 --
 
