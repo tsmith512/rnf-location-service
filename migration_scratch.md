@@ -47,14 +47,16 @@ For `/waypoint/latest`
 ``` sql
 
 SELECT
-  timestamp,
-  ST_X(point::geometry) AS "lon",
-  ST_Y(point::geometry) AS "lat",
-  city,
-  admin,
-  'TODO' as "trips"
-FROM public.waypoints
-ORDER BY timestamp DESC
+  waypoints.timestamp,
+  ST_X(waypoints.point::geometry) AS "lon",
+  ST_Y(waypoints.point::geometry) AS "lat",
+  waypoints.city,
+  waypoints."admin",
+  array_agg(trips.id) as "trips"
+FROM waypoints
+  LEFT JOIN trips ON waypoints.timestamp BETWEEN trips.start AND trips.end
+GROUP BY waypoints.id
+ORDER BY timestamp ASC
 LIMIT 1;
 
 ```
@@ -71,6 +73,30 @@ to_timestamp(timestamp)
 FROM waypoints
 ORDER BY diff
 LIMIT 1;
+
+```
+
+Make a view from that first example and then the first endpoint can `LIMIT 1` on it and the other can select the lowest `abs()` value. Right...?
+
+Also if the view requires a matching trip, then the middleware doesn't have to do it.
+
+Rename that table to `waypoint_data` so the interface can hit the view called `waypoints`
+
+``` sql
+
+CREATE OR REPLACE VIEW waypoints
+AS SELECT
+w.timestamp,
+ST_X(w.point::geometry) AS lon,
+ST_Y(w.point::geometry) AS lat,
+w.city,
+w."admin",
+array_agg(t.id) AS trips
+FROM waypoint_data w
+LEFT JOIN trips t ON w.timestamp BETWEEN t.start AND t.end
+WHERE t.id IS NOT NULL
+GROUP BY w.id
+ORDER BY timestamp DESC
 
 ```
 
