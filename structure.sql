@@ -102,10 +102,10 @@ ALTER SEQUENCE public.trips_id_seq OWNED BY public.trips.id;
 
 
 --
--- Name: waypoints; Type: TABLE; Schema: public; Owner: -
+-- Name: waypoint_data; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.waypoints (
+CREATE TABLE public.waypoint_data (
     id integer NOT NULL,
     "timestamp" integer DEFAULT date_part('epoch'::text, CURRENT_TIMESTAMP) NOT NULL,
     point public.geography NOT NULL,
@@ -132,7 +132,7 @@ CREATE SEQUENCE public.waypoints_id_seq
 -- Name: waypoints_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.waypoints_id_seq OWNED BY public.waypoints.id;
+ALTER SEQUENCE public.waypoints_id_seq OWNED BY public.waypoint_data.id;
 
 
 --
@@ -143,10 +143,10 @@ ALTER TABLE ONLY public.trips ALTER COLUMN id SET DEFAULT nextval('public.trips_
 
 
 --
--- Name: waypoints id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: waypoint_data id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.waypoints ALTER COLUMN id SET DEFAULT nextval('public.waypoints_id_seq'::regclass);
+ALTER TABLE ONLY public.waypoint_data ALTER COLUMN id SET DEFAULT nextval('public.waypoints_id_seq'::regclass);
 
 
 --
@@ -158,10 +158,10 @@ ALTER TABLE ONLY public.trips
 
 
 --
--- Name: waypoints waypoints_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: waypoint_data waypoints_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.waypoints
+ALTER TABLE ONLY public.waypoint_data
     ADD CONSTRAINT waypoints_pkey PRIMARY KEY (id);
 
 
@@ -190,10 +190,10 @@ GRANT SELECT ON TABLE public.trips TO web_requests;
 
 
 --
--- Name: TABLE waypoints; Type: ACL; Schema: public; Owner: -
+-- Name: TABLE waypoint_data; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.waypoints TO web_requests;
+GRANT SELECT ON TABLE public.waypoint_data TO web_requests;
 
 
 --
