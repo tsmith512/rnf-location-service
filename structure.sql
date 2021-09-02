@@ -166,6 +166,13 @@ ALTER TABLE ONLY public.waypoints
 
 
 --
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: -
+--
+
+GRANT USAGE ON SCHEMA public TO web_requests;
+
+
+--
 -- Name: TABLE spatial_ref_sys; Type: ACL; Schema: public; Owner: -
 --
 
@@ -173,6 +180,20 @@ REVOKE ALL ON TABLE public.spatial_ref_sys FROM postgres;
 REVOKE SELECT ON TABLE public.spatial_ref_sys FROM PUBLIC;
 GRANT ALL ON TABLE public.spatial_ref_sys TO rnf;
 GRANT SELECT ON TABLE public.spatial_ref_sys TO PUBLIC;
+
+
+--
+-- Name: TABLE trips; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.trips TO web_requests;
+
+
+--
+-- Name: TABLE waypoints; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.waypoints TO web_requests;
 
 
 --
