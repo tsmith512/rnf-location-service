@@ -222,10 +222,10 @@ GRANT SELECT ON TABLE public.trips TO web_requests;
 
 
 --
--- Name: TABLE waypoint_data; Type: ACL; Schema: public; Owner: -
+-- Name: TABLE waypoints; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.waypoint_data TO web_requests;
+GRANT SELECT ON TABLE public.waypoints TO web_requests;
 
 
 --
