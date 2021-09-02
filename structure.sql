@@ -117,6 +117,20 @@ CREATE TABLE public.waypoint_data (
 
 
 --
+-- Name: waypoints; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.waypoints AS
+SELECT
+    NULL::integer AS "timestamp",
+    NULL::double precision AS lon,
+    NULL::double precision AS lat,
+    NULL::text AS city,
+    NULL::text AS admin,
+    NULL::integer[] AS trips;
+
+
+--
 -- Name: waypoints_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -163,6 +177,24 @@ ALTER TABLE ONLY public.trips
 
 ALTER TABLE ONLY public.waypoint_data
     ADD CONSTRAINT waypoints_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: waypoints _RETURN; Type: RULE; Schema: public; Owner: -
+--
+
+CREATE OR REPLACE VIEW public.waypoints AS
+ SELECT w."timestamp",
+    public.st_x((w.point)::public.geometry) AS lon,
+    public.st_y((w.point)::public.geometry) AS lat,
+    w.city,
+    w.admin,
+    array_agg(t.id) AS trips
+   FROM (public.waypoint_data w
+     LEFT JOIN public.trips t ON (((w."timestamp" >= t.start) AND (w."timestamp" <= t."end"))))
+  WHERE (t.id IS NOT NULL)
+  GROUP BY w.id
+  ORDER BY w."timestamp" DESC;
 
 
 --
