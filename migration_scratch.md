@@ -124,3 +124,17 @@ GROUP BY trips.id
 ```
 
 Would probably only want to grab one at a time.
+
+Save that as a view like `waypoints` above:
+
+``` sql
+
+CREATE OR REPLACE VIEW trips
+AS SELECT t.*,
+ST_AsGeoJSON(ST_MakeLine(w.point::geometry ORDER BY timestamp))::jsonb AS line
+FROM trip_data t
+LEFT JOIN waypoint_data w
+ON w.timestamp between t.start and t.end
+GROUP BY t.id
+
+```
