@@ -48,6 +48,7 @@ This is just an `INSERT` to `waypoint_data`.
 - `POST /waypoint_data`
 - With the JWT as a Bearer token
 - Header `Prefer: resolution=merge-duplicates` to force an upsert by timestamp
+  - Add `return=representation` to that to get the object back, but the `point` will come back as a hex-coded EWKB.
 - Body:
 
 ``` json
