@@ -86,7 +86,22 @@ SELECT * FROM waypoints LIMIT 1;
 
 For `GET /waypoint/{time}`
 
-?
+``` sql
+
+-- Turn the query below into a function for PostgREST reasons
+
+CREATE OR REPLACE FUNCTION waypoint_by_time(whattime int)
+RETURNS waypoints AS $$
+  SELECT * FROM waypoints
+  ORDER BY (abs(timestamp - whattime)) ASC
+  LIMIT 1
+$$ LANGUAGE SQL
+
+-- Then
+
+SELECT * FROM waypoint_by_time(1625460412);
+
+```
 
 For `GET /trips`
 
@@ -151,6 +166,12 @@ to_timestamp(timestamp)
 FROM waypoints
 ORDER BY diff
 LIMIT 1;
+
+-- With the view and using timestamps as numbers, this is better.
+
+SELECT * FROM waypoints
+ORDER BY (abs(timestamp - 1625460412)) ASC
+LIMIT 1; 
 
 ```
 
