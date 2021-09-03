@@ -6,6 +6,8 @@ Transforms and queries for the v1-MySQL to v2-PostgreSQL
 
 ``` sql
 
+-- For waypoint_data
+
 SELECT
 id,
 `time` AS 'timestamp',
@@ -14,6 +16,8 @@ city,
 full_city AS admin,
 geocode_attempts
 FROM location_history;
+
+-- For trip_data
 
 SELECT
 id,
@@ -27,22 +31,98 @@ FROM trips;
 
 Notes:
 
-- Remove the quotes that MySQL is gonna put in that `timestamp` column; that is an expresstion for psql to evaluate
-- geocode_raw_response in v1 is stored as a PHP serialized associative array from a different library, so that's gonna have to go.
-- I want to change `full_city` because it doesn't work well for rural locations. Recode everything?
-- **Warning** `to_timestamp` returns `timestamp WITH time zone` which is not the logic I'm working on. Server time is UTC
+- Remove the quotes that MySQL is gonna put in that `timestamp` column; that is an expression for psql to evaluate
+- geocode_raw_response in v1 is stored as a PHP serialized associative array from a different library, just dump it
+- I want to change `full_city` because it doesn't work well for rural locations. Recode everything? (Also decided to rename that to `admin` which is a little keyed to Google Maps Reverse Geocode API but whatever)
+- Warning: `to_timestamp` returns `timestamp WITH time zone` which is not the logic I'm working on. Server time is UTC. I'm doing it with epoch timestamps as numbers, sue me.
 
-## v2 Queries
+## v2 App-related Queries
+
+### Creating Database Rows
+
+#### Create Waypoint
+
+#### CRUD Trip
+
+(That's going to be manual psql for a minute because I'm cool like that.)
+
+### Fetching Data
+
+Create a view that describes waypoints and trips to match API docs. Requiring a `trip_data.id` on `waypoints` eliminates that security requirement in the middleware. Adding a GeoJSON aggregate of waypoints on `trips.line` is super convenient and a lot faster here.
+
+``` sql
+
+CREATE OR REPLACE VIEW waypoints
+  AS SELECT
+    w.timestamp,
+    ST_X(w.point::geometry) AS lon,
+    ST_Y(w.point::geometry) AS lat,
+    w.city,
+    w."admin",
+    array_agg(t.id) AS trips
+  FROM waypoint_data w
+    LEFT JOIN trips t ON w.timestamp BETWEEN t.start AND t.end
+  WHERE t.id IS NOT NULL
+  GROUP BY w.id
+  ORDER BY timestamp DESC
+
+CREATE OR REPLACE VIEW trips
+  AS SELECT t.*,
+    ST_AsGeoJSON(ST_MakeLine(w.point::geometry ORDER BY timestamp))::jsonb AS line
+  FROM trip_data t
+  LEFT JOIN waypoint_data w
+  ON w.timestamp between t.start and t.end
+  GROUP BY t.id
+
+```
+
+For `GET /waypoint/latest`
+
+``` sql
+
+SELECT * FROM waypoints LIMIT 1;
+
+```
+
+For `GET /waypoint/{time}`
+
+?
+
+For `GET /trips`
+
+This view includes that geojson aggregate. The trip index maybe should just query on trip_data directly, but it doesn't get called often.
+
+``` sql
+
+SELECT id, label, slug, "start", "end" FROM trips;
+
+```
+
+For `GET /trips/{id}`
+
+``` sql
+
+SELECT * FROM trips WHERE id = {id}
+
+```
+
+---
+
+## Scratchwork
 
 Grabs a timestamp as unix and coordinate pairs as floats
 
 ``` sql
 
-SELECT EXTRACT(EPOCH FROM timestamp) as "timestamp", ST_X(point::geometry) AS "lon", ST_Y(point::geometry) AS "lat" FROM public.waypoints LIMIT 100;
+SELECT
+  EXTRACT(EPOCH FROM timestamp) as "timestamp",
+  ST_X(point::geometry) AS "lon",
+  ST_Y(point::geometry) AS "lat"
+FROM public.waypoints LIMIT 100;
 
 ```
 
-For `/waypoint/latest`
+**Latest waypoint:** Grabs the newest waypoint and formats it like the waypoint object defiend in the middleware API. `array_agg` removes the need for a subsequent fetch.
 
 ``` sql
 
@@ -56,14 +136,12 @@ SELECT
 FROM waypoints
   LEFT JOIN trips ON waypoints.timestamp BETWEEN trips.start AND trips.end
 GROUP BY waypoints.id
-ORDER BY timestamp ASC
+ORDER BY timestamp DESC
 LIMIT 1;
 
 ```
 
-For `/waypoint/{time}`
-
-Except that this is kinda shitty for a number of reasons.
+**Getting waypoint for a particular time:** Except that this is kinda shitty for a number of reasons.
 
 ``` sql
 
@@ -76,33 +154,15 @@ LIMIT 1;
 
 ```
 
-Make a view from that first example and then the first endpoint can `LIMIT 1` on it and the other can select the lowest `abs()` value. Right...?
+**Idea:** Make a view from that first example that doesn't have the limit. Query that with a limit for latest; select the lowest `abs()` value for time-nearst. Right...?
 
-Also if the view requires a matching trip, then the middleware doesn't have to do it.
+Also if the view requires a matching trip, then the middleware doesn't have to do it! (require trip.id not null)
 
 Rename that table to `waypoint_data` so the interface can hit the view called `waypoints`
 
-``` sql
+---
 
-CREATE OR REPLACE VIEW waypoints
-AS SELECT
-w.timestamp,
-ST_X(w.point::geometry) AS lon,
-ST_Y(w.point::geometry) AS lat,
-w.city,
-w."admin",
-array_agg(t.id) AS trips
-FROM waypoint_data w
-LEFT JOIN trips t ON w.timestamp BETWEEN t.start AND t.end
-WHERE t.id IS NOT NULL
-GROUP BY w.id
-ORDER BY timestamp DESC
-
-```
-
-## Random Stuff
-
-Well this makes a GeoJSON line
+Well this makes a GeoJSON line and that's awesome
 
 ``` sql
 
@@ -123,18 +183,5 @@ GROUP BY trips.id
 
 ```
 
-Would probably only want to grab one at a time.
+Would probably only want to grab one at a time, that's probably expensive
 
-Save that as a view like `waypoints` above:
-
-``` sql
-
-CREATE OR REPLACE VIEW trips
-AS SELECT t.*,
-ST_AsGeoJSON(ST_MakeLine(w.point::geometry ORDER BY timestamp))::jsonb AS line
-FROM trip_data t
-LEFT JOIN waypoint_data w
-ON w.timestamp between t.start and t.end
-GROUP BY t.id
-
-```
