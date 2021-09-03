@@ -40,7 +40,9 @@ Notes:
 
 ### Creating Database Rows
 
-#### Create Waypoint
+#### Create Waypoint `POST /waypoint`
+
+?
 
 #### CRUD Trip
 
@@ -76,7 +78,7 @@ CREATE OR REPLACE VIEW trips
 
 ```
 
-For `GET /waypoint/latest`
+#### ✅ For `GET /waypoint/latest`
 
 ``` sql
 
@@ -84,7 +86,11 @@ SELECT * FROM waypoints LIMIT 1;
 
 ```
 
-For `GET /waypoint/{time}`
+Middleware to PostgREST:
+
+- `GET /waypoints?limit=1`
+
+#### ✅ For `GET /waypoint/{time}`
 
 ``` sql
 
@@ -103,7 +109,13 @@ SELECT * FROM waypoint_by_time(1625460412);
 
 ```
 
-For `GET /trips`
+Middleware to PostgREST:
+
+- `POST /rpc/waypoint_by_time`
+- with body `{"whattime":1625460412}`
+- To avoid an array of 1, use `Accept: application/vnd.pgrst.object+json`
+
+#### ✅ For `GET /trips`
 
 This view includes that geojson aggregate. The trip index maybe should just query on trip_data directly, but it doesn't get called often.
 
@@ -113,13 +125,22 @@ SELECT id, label, slug, "start", "end" FROM trips;
 
 ```
 
-For `GET /trips/{id}`
+Middleware to PostgREST:
+
+- `GET /trips?select=id,label,slug,start,end`
+
+#### ✅ For `GET /trips/{id}`
 
 ``` sql
 
 SELECT * FROM trips WHERE id = {id}
 
 ```
+
+Middleware to PostgREST:
+
+- `GET /trips?id=eq.25`
+- To avoid an array of 1, use `Accept: application/vnd.pgrst.object+json`
 
 ---
 
