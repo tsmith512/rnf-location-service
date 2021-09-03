@@ -34,6 +34,7 @@ Notes:
 - Remove the quotes that MySQL is gonna put in that `timestamp` column; that is an expression for psql to evaluate
 - geocode_raw_response in v1 is stored as a PHP serialized associative array from a different library, just dump it
 - I want to change `full_city` because it doesn't work well for rural locations. Recode everything? (Also decided to rename that to `admin` which is a little keyed to Google Maps Reverse Geocode API but whatever)
+- This value can be plural. After the DB migration be sure to advance the `SEQUENCE` for both tables.
 - Warning: `to_timestamp` returns `timestamp WITH time zone` which is not the logic I'm working on. Server time is UTC. I'm doing it with epoch timestamps as numbers, sue me.
 
 ## v2 App-related Queries
@@ -42,7 +43,26 @@ Notes:
 
 #### Create Waypoint `POST /waypoint`
 
-?
+This is just an `INSERT` to `waypoint_data`.
+
+- `POST /waypoint_data`
+- With the JWT as a Bearer token
+- Header `Prefer: resolution=merge-duplicates` to force an upsert by timestamp
+- Body:
+
+``` json
+
+[{
+    "timestamp": 1630652576,
+    "point": "POINT(-109.76731 43.00358)",
+    "city": "Pinedale, WY",
+    "admin": "Long untermined administrative region string",
+    "geocode_attempts": 1
+}]
+
+```
+
+#### Update Waypoint `PUT 
 
 #### CRUD Trip
 
@@ -65,7 +85,7 @@ CREATE OR REPLACE VIEW waypoints
   FROM waypoint_data w
     LEFT JOIN trips t ON w.timestamp BETWEEN t.start AND t.end
   WHERE t.id IS NOT NULL
-  GROUP BY w.id
+  GROUP BY w.timestamp
   ORDER BY timestamp DESC
 
 CREATE OR REPLACE VIEW trips
