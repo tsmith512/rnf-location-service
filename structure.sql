@@ -64,21 +64,62 @@ CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
 COMMENT ON EXTENSION postgis IS 'PostGIS geometry, geography, and raster spatial types and functions';
 
 
+--
+-- Name: waypoints; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.waypoints AS
+SELECT
+    NULL::integer AS "timestamp",
+    NULL::double precision AS lon,
+    NULL::double precision AS lat,
+    NULL::text AS city,
+    NULL::text AS admin,
+    NULL::integer[] AS trips;
+
+
+--
+-- Name: waypoint_by_time(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.waypoint_by_time(whattime integer) RETURNS public.waypoints
+    LANGUAGE sql
+    AS $$
+  SELECT * FROM waypoints
+  ORDER BY (abs(timestamp - whattime)) ASC
+  LIMIT 1
+$$;
+
+
 SET default_tablespace = '';
 
 SET default_with_oids = false;
 
 --
--- Name: trips; Type: TABLE; Schema: public; Owner: -
+-- Name: trip_data; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.trips (
+CREATE TABLE public.trip_data (
     id integer NOT NULL,
     label text,
     slug character varying(50) NOT NULL,
     start integer NOT NULL,
     "end" integer NOT NULL
 );
+
+
+--
+-- Name: trips; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.trips AS
+SELECT
+    NULL::integer AS id,
+    NULL::text AS label,
+    NULL::character varying(50) AS slug,
+    NULL::integer AS start,
+    NULL::integer AS "end",
+    NULL::jsonb AS line;
 
 
 --
@@ -98,15 +139,14 @@ CREATE SEQUENCE public.trips_id_seq
 -- Name: trips_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.trips_id_seq OWNED BY public.trips.id;
+ALTER SEQUENCE public.trips_id_seq OWNED BY public.trip_data.id;
 
 
 --
--- Name: waypoints; Type: TABLE; Schema: public; Owner: -
+-- Name: waypoint_data; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.waypoints (
-    id integer NOT NULL,
+CREATE TABLE public.waypoint_data (
     "timestamp" integer DEFAULT date_part('epoch'::text, CURRENT_TIMESTAMP) NOT NULL,
     point public.geography NOT NULL,
     city text,
@@ -117,52 +157,76 @@ CREATE TABLE public.waypoints (
 
 
 --
--- Name: waypoints_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: trip_data id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.waypoints_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+ALTER TABLE ONLY public.trip_data ALTER COLUMN id SET DEFAULT nextval('public.trips_id_seq'::regclass);
 
 
 --
--- Name: waypoints_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: trip_data trips_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.waypoints_id_seq OWNED BY public.waypoints.id;
-
-
---
--- Name: trips id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.trips ALTER COLUMN id SET DEFAULT nextval('public.trips_id_seq'::regclass);
-
-
---
--- Name: waypoints id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.waypoints ALTER COLUMN id SET DEFAULT nextval('public.waypoints_id_seq'::regclass);
-
-
---
--- Name: trips trips_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.trips
+ALTER TABLE ONLY public.trip_data
     ADD CONSTRAINT trips_pkey PRIMARY KEY (id);
 
 
 --
--- Name: waypoints waypoints_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: waypoint_data waypoint_data_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.waypoints
-    ADD CONSTRAINT waypoints_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.waypoint_data
+    ADD CONSTRAINT waypoint_data_pkey PRIMARY KEY ("timestamp");
+
+
+--
+-- Name: trips _RETURN; Type: RULE; Schema: public; Owner: -
+--
+
+CREATE OR REPLACE VIEW public.trips AS
+ SELECT t.id,
+    t.label,
+    t.slug,
+    t.start,
+    t."end",
+    (public.st_asgeojson(public.st_makeline((w.point)::public.geometry ORDER BY w."timestamp")))::jsonb AS line
+   FROM (public.trip_data t
+     LEFT JOIN public.waypoint_data w ON (((w."timestamp" >= t.start) AND (w."timestamp" <= t."end"))))
+  GROUP BY t.id;
+
+
+--
+-- Name: waypoints _RETURN; Type: RULE; Schema: public; Owner: -
+--
+
+CREATE OR REPLACE VIEW public.waypoints AS
+ SELECT w."timestamp",
+    public.st_x((w.point)::public.geometry) AS lon,
+    public.st_y((w.point)::public.geometry) AS lat,
+    w.city,
+    w.admin,
+    array_agg(t.id) AS trips
+   FROM (public.waypoint_data w
+     LEFT JOIN public.trips t ON (((w."timestamp" >= t.start) AND (w."timestamp" <= t."end"))))
+  WHERE (t.id IS NOT NULL)
+  GROUP BY w."timestamp"
+  ORDER BY w."timestamp" DESC;
+
+
+--
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: -
+--
+
+GRANT USAGE ON SCHEMA public TO web_requests;
+GRANT USAGE ON SCHEMA public TO admin_requests;
+
+
+--
+-- Name: TABLE waypoints; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.waypoints TO web_requests;
+GRANT SELECT ON TABLE public.waypoints TO admin_requests;
 
 
 --
@@ -173,6 +237,35 @@ REVOKE ALL ON TABLE public.spatial_ref_sys FROM postgres;
 REVOKE SELECT ON TABLE public.spatial_ref_sys FROM PUBLIC;
 GRANT ALL ON TABLE public.spatial_ref_sys TO rnf;
 GRANT SELECT ON TABLE public.spatial_ref_sys TO PUBLIC;
+
+
+--
+-- Name: TABLE trip_data; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.trip_data TO admin_requests;
+
+
+--
+-- Name: TABLE trips; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.trips TO web_requests;
+GRANT SELECT ON TABLE public.trips TO admin_requests;
+
+
+--
+-- Name: SEQUENCE trips_id_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT,USAGE ON SEQUENCE public.trips_id_seq TO admin_requests;
+
+
+--
+-- Name: TABLE waypoint_data; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.waypoint_data TO admin_requests;
 
 
 --
