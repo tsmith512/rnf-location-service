@@ -20,6 +20,8 @@ Data:
 - A `waypoint` is a specific geographic location with a timestamp and, optionally, geocoded information
 - A `trip` is a date range and a name which collects waypoints
 
+**This describes the API endpoint exposed by the middleware,** not the API exposed by PostgreSQL/PostgREST that the middleware uses. Trying to make both sides match got weird.
+
 # Group Waypoints
 
 ## Create Waypoint [/waypoint?key={key}]
