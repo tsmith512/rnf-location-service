@@ -4,14 +4,15 @@ import {
   HelloWorld,
   TripIndex,
   TripDetails,
+  WaypointCreate,
   WaypointSearch,
   WaypointLatest,
 } from './handlers';
 
 const router = Router();
 
-router.post('/waypoints', HelloWorld);
 router.get('/waypoints', HelloWorld);
+router.post('/waypoint', WaypointCreate);
 router.get('/waypoint', WaypointLatest);
 router.get('/waypoint/:whattime', WaypointSearch);
 router.get('/trips/', TripIndex);

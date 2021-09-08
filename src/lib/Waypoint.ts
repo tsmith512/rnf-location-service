@@ -18,4 +18,9 @@ export class Waypoint {
   constructor(props: WaypointProps) {
     Object.assign(this, props);
   }
+
+  async geocode() {
+    this.admin = 'ADMIN TEXT REPLACED';
+    this.city = 'CITY TEXT';
+  }
 }
