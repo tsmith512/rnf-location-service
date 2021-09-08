@@ -1,4 +1,6 @@
-import { Trip, TripProps } from '../lib/Trip';
+import { Trip } from '../lib/Trip';
+import { ReqWithParams } from '../lib/global';
+
 
 // @TODO: How to make this everywhere?
 const standardHeaders = new Headers({
@@ -9,7 +11,7 @@ const standardHeaders = new Headers({
 // NB: fetch() requires either a Host header or to fetch by hostname, not IP.
 // Also NB: random IP:Port combos not allowed. Must connect to a standard HTTP(S)
 // port on a named host in Cloudflare Worker world.
-async function getAllTrips(range: string | null): Promise<Trip[] | Error> {
+async function getAllTrips(range: string | undefined): Promise<Trip[] | Error> {
   const requestHeaders = new Headers();
   if (range) { requestHeaders.append('Range', range); }
 
@@ -20,24 +22,25 @@ async function getAllTrips(range: string | null): Promise<Trip[] | Error> {
     })
     .catch(error => {
       if (error instanceof SyntaxError) {
-        return Error("JSON Parse Error");
+        return Error('500: JSON Parse Error');
       }
 
       // @TODO: Record and translate other errors here.
       console.log(error);
 
-      return Error("Unknown error in getAllTrips");
+      return Error('500: Unknown error in getAllTrips');
     });
 }
 
-export async function TripsIndex(request: Request): Promise<Response> {
-  // @TODO: Validate
-  const range = request.headers.get('Range');
+export async function TripIndex(request: ReqWithParams): Promise<Response> {
+
+  const range = request.headers.get('Range')?.match(/\d+-\d+/g)?.pop();
 
   const trips = await getAllTrips(range);
 
   if (trips instanceof Error) {
-    return new Response(JSON.stringify({message: trips.message}), {status: 500, headers: standardHeaders});
+    const [ code, message ] = trips.message?.split(': ');
+    return new Response(JSON.stringify({message: message}), {status: parseInt(code), headers: standardHeaders});
   }
 
   if (!trips.length) {
