@@ -1,4 +1,4 @@
-import { Trip, TripProps } from '../lib/Trip';
+import { Waypoint } from '../lib/Waypoint';
 import { ReqWithParams } from '../lib/global';
 
 // @TODO: How to make this everywhere?
@@ -7,20 +7,20 @@ const standardHeaders = new Headers({
   'Content-Type': 'application/json',
 });
 
-async function getTrip(id: number): Promise<Trip | Error> {
+async function getLatestWaypoint(): Promise<Waypoint | Error> {
   // Tell PostgREST that we want a single object, not an array of one.
   const requestHeaders = new Headers();
   requestHeaders.append('Accept', 'application/vnd.pgrst.object+json');
 
-  return fetch(`${DB_ENDPOINT}/trips?id=eq.${id}`, { headers: requestHeaders })
+  return fetch(`${DB_ENDPOINT}/waypoints?limit=1`, { headers: requestHeaders })
     .then((response) => {
       if (response.status == 406) {
-        return Error('404: Trip Not Found');
+        return Error('404: Waypoint Not Found');
       }
       return response.json();
     })
     .then((payload) => {
-      return payload as Trip;
+      return payload as Waypoint;
     })
     .catch((error) => {
       if (error instanceof SyntaxError) {
@@ -30,23 +30,24 @@ async function getTrip(id: number): Promise<Trip | Error> {
       // @TODO: Record and translate other errors here.
       console.log(error);
 
-      return Error('500: Unknown error in getTrip');
+      return Error('500: Unknown error in getWaypoint');
     });
 }
 
-export async function TripDetails(request: ReqWithParams): Promise<Response> {
-  const id = parseInt(request.params.id);
-  const trip = await getTrip(id);
+export async function WaypointLatest(
+  request: ReqWithParams
+): Promise<Response> {
+  const waypoint = await getLatestWaypoint();
 
-  if (trip instanceof Error) {
-    const [code, message] = trip.message?.split(': ');
+  if (waypoint instanceof Error) {
+    const [code, message] = waypoint.message?.split(': ');
     return new Response(JSON.stringify({ message: message }), {
       status: parseInt(code),
       headers: standardHeaders,
     });
   }
 
-  return new Response(JSON.stringify(trip), {
+  return new Response(JSON.stringify(waypoint), {
     status: 200,
     headers: standardHeaders,
   });
