@@ -12,17 +12,17 @@ async function getTrip(id: number): Promise<Trip | Error> {
   const requestHeaders = new Headers();
   requestHeaders.append('Accept', 'application/vnd.pgrst.object+json');
 
-  return fetch(`${DB_ENDPOINT}/trips?id=eq.${id}`, {headers: requestHeaders})
-    .then(response => {
+  return fetch(`${DB_ENDPOINT}/trips?id=eq.${id}`, { headers: requestHeaders })
+    .then((response) => {
       if (response.status == 406) {
-        return Error('404: Trip Not Found')
+        return Error('404: Trip Not Found');
       }
       return response.json();
     })
-    .then(payload => {
+    .then((payload) => {
       return payload as Trip;
     })
-    .catch(error => {
+    .catch((error) => {
       if (error instanceof SyntaxError) {
         return Error('500: JSON Parse Error');
       }
@@ -41,9 +41,15 @@ export async function TripDetails(request: ReqWithParams): Promise<Response> {
   const trip = await getTrip(id);
 
   if (trip instanceof Error) {
-    const [ code, message ] = trip.message?.split(': ');
-    return new Response(JSON.stringify({message: message}), {status: parseInt(code), headers: standardHeaders});
+    const [code, message] = trip.message?.split(': ');
+    return new Response(JSON.stringify({ message: message }), {
+      status: parseInt(code),
+      headers: standardHeaders,
+    });
   }
 
-  return new Response(JSON.stringify(trip), {status: 200, headers: standardHeaders});
+  return new Response(JSON.stringify(trip), {
+    status: 200,
+    headers: standardHeaders,
+  });
 }

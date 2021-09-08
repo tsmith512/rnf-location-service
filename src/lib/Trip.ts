@@ -4,7 +4,7 @@ export interface TripProps {
   slug: string | null;
   start: number;
   end: number;
-  line?: GeoJSON.GeoJSON
+  line?: GeoJSON.GeoJSON;
 }
 
 export class Trip {
