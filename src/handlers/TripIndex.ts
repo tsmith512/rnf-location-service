@@ -52,10 +52,10 @@ export async function TripIndex(request: ReqWithParams): Promise<Response> {
   }
 
   if (!trips.length) {
-    return new Response(
-      JSON.stringify({ message: 'No trips available in this range' }),
-      { status: 416, headers: standardHeaders }
-    );
+    return new Response(JSON.stringify({ message: 'No trips available in this range' }), {
+      status: 416,
+      headers: standardHeaders,
+    });
   }
 
   return new Response(JSON.stringify(trips), {

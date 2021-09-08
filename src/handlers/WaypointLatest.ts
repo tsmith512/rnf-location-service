@@ -34,9 +34,7 @@ async function getLatestWaypoint(): Promise<Waypoint | Error> {
     });
 }
 
-export async function WaypointLatest(
-  request: ReqWithParams
-): Promise<Response> {
+export async function WaypointLatest(request: ReqWithParams): Promise<Response> {
   const waypoint = await getLatestWaypoint();
 
   if (waypoint instanceof Error) {
