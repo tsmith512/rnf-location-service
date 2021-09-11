@@ -56,11 +56,10 @@ export async function WaypointCreate(request: ReqWithParams): Promise<Response> 
     );
   });
 
-  console.log(JSON.stringify(waypoints));
-
-  waypoints.forEach((w) => w.geocode());
-
-  console.log(JSON.stringify(waypoints));
+  // This awaits geocoding on all of them, which is cool but bad for a long list
+  await Promise.all(waypoints.map(async (p) => {
+    await p.geocode();
+  }));
 
   return new Response(JSON.stringify(waypoints), {
     status: 200,

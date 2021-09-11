@@ -9,3 +9,6 @@ workers_dev = true
 command = "npm install && npm run build"
 [build.upload]
 format = "service-worker"
+
+[vars]
+GMAPS_API_ENDPOINT = "https://maps.googleapis.com/maps/api/geocode/json"
