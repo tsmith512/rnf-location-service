@@ -5,8 +5,9 @@ export interface WaypointProps {
   lon: number;
   lat: number;
   point?: string;
-  city?: string;
-  admin?: string;
+  label?: string;
+  state?: string;
+  country?: string;
 }
 
 export class Waypoint {
@@ -14,8 +15,9 @@ export class Waypoint {
   lon: number;
   lat: number;
   point?: string;
-  city?: string;
-  admin?: string;
+  label?: string;
+  state?: string;
+  country?: string;
   geocode_attempts: number;
   geocode_results: GeocoderResponse;
 
@@ -32,9 +34,9 @@ export class Waypoint {
     if (results instanceof Error) {
       return false;
     } else {
-      this.city = results.name;
-      // @TODO: I had a plan for "admin" being different than "city"...
-      this.admin = results.name;
+      this.label = results.label;
+      this.state = results.state;
+      this.country = results.country;
       this.geocode_results = results;
       return true;
     }

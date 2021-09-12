@@ -20,7 +20,9 @@ export interface AddressComponentStack {
 }
 
 export interface GeocoderResponse {
-  name: string;
+  label?: string;
+  state?: string;
+  country?: string;
   components: AddressComponentStack;
 }
 
@@ -51,10 +53,9 @@ export class Geocoder {
     // Let's make a better "City, ST, C" or "State, C" kinda name
     const locationName = this.buildLocationName(addressPieces);
 
-    return {
-      name: locationName,
-      components: addressPieces.components,
-    };
+    addressPieces.label = locationName;
+
+    return addressPieces;
   }
 
   async fetchReverseGeo(): Promise<Object | Error> {
@@ -86,10 +87,12 @@ export class Geocoder {
     }
 
     const pieces = this.readComponents(payload.results[0].address_components);
-    const address = payload.results[0].formatted_address || '';
+    const address = payload.results[0].formatted_address || undefined;
 
     return {
-      name: address,
+      label: address,
+      state: pieces.administrative_area_level_1?.long,
+      country: pieces.country?.long,
       components: pieces,
     };
   }
