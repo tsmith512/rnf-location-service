@@ -1,6 +1,7 @@
 declare global {
   // In secrets
   const DB_ENDPOINT: string;
+  const DB_ADMIN_JWT: string;
   const GMAPS_API_KEY: string;
 
   // In wrangler.toml as plaintext

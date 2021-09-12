@@ -47,13 +47,18 @@ export async function WaypointCreate(request: ReqWithParams): Promise<Response> 
 
   lines.forEach((line) => {
     const [date, timestamp, lat, lon] = line.split(',');
-    waypoints.push(
-      new Waypoint({
-        timestamp: parseInt(timestamp),
-        lon: parseFloat(lon),
-        lat: parseFloat(lat),
-      })
-    );
+
+    // Confirm we have all the pieces, Tasker's queue ends with an empty line.
+    // Or maybe a line is goofy.
+    if (timestamp && lon && lat) {
+      waypoints.push(
+        new Waypoint({
+          timestamp: parseInt(timestamp),
+          lon: parseFloat(lon),
+          lat: parseFloat(lat),
+        })
+      );
+    }
   });
 
   // This awaits geocoding on all of them, which is cool but bad for a long list
@@ -61,8 +66,22 @@ export async function WaypointCreate(request: ReqWithParams): Promise<Response> 
     await p.geocode();
   }));
 
+  // This async saves each timestamp, in whatever order, individually.
+  // @TODO: That's not awesome. Also need to collect failures/successes.
+  let saves = 0;
+  await Promise.all(waypoints.map(async (p) => {
+    if (await p.save()) {
+      saves++;
+    }
+  }));
+
+  // @TODO: So if we didn't get a save confirmation for each record we tried to
+  // make... what do we do? v1 also provided this distinction but never did
+  // anything about it. :upside_down_face:
+  const status = (saves == waypoints.length) ? 201 : 200;
+
   return new Response(JSON.stringify(waypoints), {
-    status: 200,
+    status: status,
     headers: standardHeaders,
   });
 }
