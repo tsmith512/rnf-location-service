@@ -24,7 +24,7 @@ Data:
 
 # Group Waypoints
 
-## Create Waypoint [/waypoint?key={key}]
+## Create Waypoint [/waypoint]
 
 ### Create Waypoint [POST]
 
@@ -34,10 +34,11 @@ Updates should be queued client-side and submitted as a plain-text CSV file. You
 
 There is a Tasker task template in the repository in the `/tasker` directory to do this.
 
-+ Parameters
-    + key (required, string, `API-KEY`) ... API Key defined in application config at `config.yml`
-
 + Request (text/plain)
+    + Headers
+    
+            Authorization: Bearer JWT
+
     + Attributes (object)
         + date: `1-12-17` (string) - A human readable date marker; is ignored by parsing but useful for manual adjustment of queue files
         + time: `1484250000` (number) - Unix timestamp.
@@ -81,9 +82,6 @@ There is a Tasker task template in the repository in the `/tasker` directory to 
 
             Unauthorized
 
-
-## Latest Waypoint [/waypoint]
-
 ### Get Recent Waypoint [GET]
 
 Get the most recent waypoint available.
@@ -120,7 +118,7 @@ Returns an array of all trip objects **without** the GeoJSON `line` property.
 + Response 200 (application/json)
     + Attributes (array[Trip])
 
-## Trip Details [/trips/{id}]
+## Trip Details [/trip/{id}]
 
 ### Get Trip details [GET]
 
