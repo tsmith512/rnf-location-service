@@ -6,15 +6,12 @@ Transforms and queries for the v1-MySQL to v2-PostgreSQL
 
 ``` sql
 
--- For waypoint_data
+-- For waypoint_data (timestamp, lat/lon, and old label only --> full re-geocode)
 
 SELECT
-id,
 `time` AS 'timestamp',
 CONCAT("POINT(", lon, " ", lat, ")") AS `point`,
-city,
-full_city AS admin,
-geocode_attempts
+full_city AS label
 FROM location_history;
 
 -- For trip_data
