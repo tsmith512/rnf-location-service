@@ -73,8 +73,9 @@ SELECT
     NULL::integer AS "timestamp",
     NULL::double precision AS lon,
     NULL::double precision AS lat,
-    NULL::text AS city,
-    NULL::text AS admin,
+    NULL::text AS label,
+    NULL::text AS state,
+    NULL::text AS country,
     NULL::integer[] AS trips;
 
 
@@ -149,10 +150,11 @@ ALTER SEQUENCE public.trips_id_seq OWNED BY public.trip_data.id;
 CREATE TABLE public.waypoint_data (
     "timestamp" integer DEFAULT date_part('epoch'::text, CURRENT_TIMESTAMP) NOT NULL,
     point public.geography NOT NULL,
-    city text,
-    admin text,
+    label text,
+    state text,
+    country text,
     geocode_attempts integer,
-    geocode_raw_response json
+    geocode_results json
 );
 
 
@@ -203,8 +205,9 @@ CREATE OR REPLACE VIEW public.waypoints AS
  SELECT w."timestamp",
     public.st_x((w.point)::public.geometry) AS lon,
     public.st_y((w.point)::public.geometry) AS lat,
-    w.city,
-    w.admin,
+    w.label,
+    w.state,
+    w.country,
     array_agg(t.id) AS trips
    FROM (public.waypoint_data w
      LEFT JOIN public.trips t ON (((w."timestamp" >= t.start) AND (w."timestamp" <= t."end"))))
@@ -271,4 +274,3 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.waypoint_data TO admin_request
 --
 -- PostgreSQL database dump complete
 --
-
