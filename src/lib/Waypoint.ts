@@ -62,8 +62,6 @@ export class Waypoint {
       geocode_results: this.geocode_results || null,
     }];
 
-    console.log(JSON.stringify(payload));
-
     return fetch(`${DB_ENDPOINT}/waypoint_data`, {
       method: 'POST',
       headers: requestHeaders,
@@ -100,4 +98,65 @@ export class Waypoint {
         return false;
       });
   }
+}
+
+// @TODO: What can be combined here with Waypoint::save() because this is
+// basically the same thing... except this one doesn't update the props on the
+// Waypoint objects because we don't necessarily know what order they'll come
+// back in
+export async function waypointBulkSave(waypoints: Waypoint[]): Promise<number | Error> {
+  const requestHeaders = new Headers({
+    'Authorization': `Bearer ${DB_ADMIN_JWT}`,
+    'Prefer': 'resolution=merge-duplicates,return=representation',
+    'Content-Type': 'application/json',
+  });
+
+  const payload = [];
+
+  for (const waypoint of waypoints) {
+    payload.push({
+      timestamp: waypoint.timestamp,
+      point: `POINT(${waypoint.lon} ${waypoint.lat})`,
+      label: waypoint.label || null,
+      state: waypoint.state || null,
+      country: waypoint.country || null,
+      geocode_attempts: waypoint.geocode_attempts || 0,
+      geocode_results: waypoint.geocode_results || null,
+    });
+  }
+
+  return fetch(`${DB_ENDPOINT}/waypoint_data`, {
+    method: 'POST',
+    headers: requestHeaders,
+    body: JSON.stringify(payload),
+  })
+    .then((response) => {
+      if (response.status == 400) {
+        // We sent shit to the database...
+        return Error('500: Bad request sent to server')
+      }
+      if (response.status == 401) {
+        return Error('401: Unauthorized by Database');
+      } else if (response.status == 409) {
+        // We merge duplicates on primary key, so this shouldn't happen?
+        return Error('409: Conflict from Database');
+      } else if (response.status == 200 || response.status == 201) {
+        return response.json();
+      } else {
+        return Error('500: Unknown Error: ' + JSON.stringify(response));
+      }
+    })
+    .then((payload) => {
+      // @TODO: We might have a valid JSON payload from the server which
+      // includes a database error or some weirdness
+      return payload.length;
+    })
+    .catch((error) => {
+      if (error instanceof SyntaxError) {
+        return Error('500: JSON Parse Error');
+      }
+
+      console.log(error.message);
+      return Error('500: Unknown error in waypointBulkSave');
+    });
 }

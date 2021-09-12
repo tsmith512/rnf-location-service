@@ -1,4 +1,4 @@
-import { Waypoint } from '../lib/Waypoint';
+import { Waypoint, waypointBulkSave } from '../lib/Waypoint';
 import { ReqWithParams } from '../lib/global';
 
 // @TODO: How to make this everywhere?
@@ -6,33 +6,6 @@ const standardHeaders = new Headers({
   'Access-Control-Allow-Origin': '*',
   'Content-Type': 'application/json',
 });
-
-async function getLatestWaypoint(): Promise<Waypoint | Error> {
-  // Tell PostgREST that we want a single object, not an array of one.
-  const requestHeaders = new Headers();
-  requestHeaders.append('Accept', 'application/vnd.pgrst.object+json');
-
-  return fetch(`${DB_ENDPOINT}/waypoints?limit=1`, { headers: requestHeaders })
-    .then((response) => {
-      if (response.status == 406) {
-        return Error('404: Waypoint Not Found');
-      }
-      return response.json();
-    })
-    .then((payload) => {
-      return payload as Waypoint;
-    })
-    .catch((error) => {
-      if (error instanceof SyntaxError) {
-        return Error('500: JSON Parse Error');
-      }
-
-      // @TODO: Record and translate other errors here.
-      console.log(error);
-
-      return Error('500: Unknown error in getWaypoint');
-    });
-}
 
 export async function WaypointCreate(request: ReqWithParams): Promise<Response> {
   // Tasker [still...] records the data in a text file like this:
@@ -66,14 +39,7 @@ export async function WaypointCreate(request: ReqWithParams): Promise<Response> 
     await p.geocode();
   }));
 
-  // This async saves each timestamp, in whatever order, individually.
-  // @TODO: That's not awesome. Also need to collect failures/successes.
-  let saves = 0;
-  await Promise.all(waypoints.map(async (p) => {
-    if (await p.save()) {
-      saves++;
-    }
-  }));
+  const saves = await waypointBulkSave(waypoints);
 
   // @TODO: So if we didn't get a save confirmation for each record we tried to
   // make... what do we do? v1 also provided this distinction but never did
