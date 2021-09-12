@@ -182,22 +182,6 @@ ALTER TABLE ONLY public.waypoint_data
 
 
 --
--- Name: trips _RETURN; Type: RULE; Schema: public; Owner: -
---
-
-CREATE OR REPLACE VIEW public.trips AS
- SELECT t.id,
-    t.label,
-    t.slug,
-    t.start,
-    t."end",
-    (public.st_asgeojson(public.st_makeline((w.point)::public.geometry ORDER BY w."timestamp")))::jsonb AS line
-   FROM (public.trip_data t
-     LEFT JOIN public.waypoint_data w ON (((w."timestamp" >= t.start) AND (w."timestamp" <= t."end"))))
-  GROUP BY t.id;
-
-
---
 -- Name: waypoints _RETURN; Type: RULE; Schema: public; Owner: -
 --
 
@@ -217,6 +201,22 @@ CREATE OR REPLACE VIEW public.waypoints AS
 
 
 --
+-- Name: trips _RETURN; Type: RULE; Schema: public; Owner: -
+--
+
+CREATE OR REPLACE VIEW public.trips AS
+ SELECT t.id,
+    t.label,
+    t.slug,
+    t.start,
+    t."end",
+    (public.st_asgeojson(public.st_makeline((w.point)::public.geometry ORDER BY w."timestamp")))::jsonb AS line
+   FROM (public.trip_data t
+     LEFT JOIN public.waypoint_data w ON (((w."timestamp" >= t.start) AND (w."timestamp" <= t."end"))))
+  GROUP BY t.id;
+
+
+--
 -- Name: SCHEMA public; Type: ACL; Schema: -; Owner: -
 --
 
@@ -230,6 +230,35 @@ GRANT USAGE ON SCHEMA public TO admin_requests;
 
 GRANT SELECT ON TABLE public.waypoints TO web_requests;
 GRANT SELECT ON TABLE public.waypoints TO admin_requests;
+GRANT ALL ON TABLE public.waypoints TO rnf;
+
+
+--
+-- Name: TABLE geography_columns; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.geography_columns TO rnf;
+
+
+--
+-- Name: TABLE geometry_columns; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.geometry_columns TO rnf;
+
+
+--
+-- Name: TABLE raster_columns; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.raster_columns TO rnf;
+
+
+--
+-- Name: TABLE raster_overviews; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.raster_overviews TO rnf;
 
 
 --
@@ -237,9 +266,7 @@ GRANT SELECT ON TABLE public.waypoints TO admin_requests;
 --
 
 REVOKE ALL ON TABLE public.spatial_ref_sys FROM postgres;
-REVOKE SELECT ON TABLE public.spatial_ref_sys FROM PUBLIC;
 GRANT ALL ON TABLE public.spatial_ref_sys TO rnf;
-GRANT SELECT ON TABLE public.spatial_ref_sys TO PUBLIC;
 
 
 --
@@ -247,6 +274,7 @@ GRANT SELECT ON TABLE public.spatial_ref_sys TO PUBLIC;
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.trip_data TO admin_requests;
+GRANT ALL ON TABLE public.trip_data TO rnf;
 
 
 --
@@ -255,6 +283,7 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.trip_data TO admin_requests;
 
 GRANT SELECT ON TABLE public.trips TO web_requests;
 GRANT SELECT ON TABLE public.trips TO admin_requests;
+GRANT ALL ON TABLE public.trips TO rnf;
 
 
 --
@@ -269,8 +298,10 @@ GRANT SELECT,USAGE ON SEQUENCE public.trips_id_seq TO admin_requests;
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.waypoint_data TO admin_requests;
+GRANT ALL ON TABLE public.waypoint_data TO rnf;
 
 
 --
 -- PostgreSQL database dump complete
 --
+
