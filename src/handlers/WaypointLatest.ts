@@ -1,5 +1,6 @@
 import { Waypoint } from '../lib/Waypoint';
 import { ReqWithParams } from '../lib/global';
+import { locationFilter } from '../lib/Filter';
 
 // @TODO: How to make this everywhere?
 const standardHeaders = new Headers({
@@ -20,7 +21,7 @@ async function getLatestWaypoint(): Promise<Waypoint | Error> {
       return response.json();
     })
     .then((payload) => {
-      return payload as Waypoint;
+      return new Waypoint(payload);
     })
     .catch((error) => {
       if (error instanceof SyntaxError) {
@@ -45,7 +46,9 @@ export async function WaypointLatest(request: ReqWithParams): Promise<Response> 
     });
   }
 
-  return new Response(JSON.stringify(waypoint), {
+  const filtered = locationFilter(waypoint);
+
+  return new Response(JSON.stringify(filtered), {
     status: 200,
     headers: standardHeaders,
   });
