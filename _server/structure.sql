@@ -213,7 +213,8 @@ CREATE OR REPLACE VIEW public.trips AS
     (public.st_asgeojson(public.st_makeline((w.point)::public.geometry ORDER BY w."timestamp")))::jsonb AS line
    FROM (public.trip_data t
      LEFT JOIN public.waypoint_data w ON (((w."timestamp" >= t.start) AND (w."timestamp" <= t."end"))))
-  GROUP BY t.id;
+  GROUP BY t.id
+  ORDER BY t.id;
 
 
 --
