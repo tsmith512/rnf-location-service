@@ -15,8 +15,9 @@ async function getTrip(id: number): Promise<Trip | Error> {
 
   return fetch(`${DB_ENDPOINT}/trips?id=eq.${id}`, { headers: requestHeaders })
     .then((response) => {
+      // Add 502
       if (response.status == 406) {
-        return Error('404: Trip Not Found');
+        throw new Error('404: Trip Not Found');
       }
       return response.json();
     })
@@ -25,13 +26,10 @@ async function getTrip(id: number): Promise<Trip | Error> {
     })
     .catch((error) => {
       if (error instanceof SyntaxError) {
-        return Error('500: JSON Parse Error');
+        return new Error('500: JSON Parse Error');
       }
 
-      // @TODO: Record and translate other errors here.
-      console.log(error);
-
-      return Error('500: Unknown error in getTrip');
+      return error;
     });
 }
 
@@ -41,15 +39,13 @@ export async function TripDetails(request: ReqWithParams): Promise<Response> {
 
   if (trip instanceof Error) {
     const [code, message] = trip.message?.split(': ');
-    return new Response(JSON.stringify({ message: message }), {
-      status: parseInt(code),
+    return new Response(JSON.stringify({error: message}), {
+      status: parseInt(code) || 500,
       headers: standardHeaders,
     });
   }
 
-  const filtered = locationFilter(trip);
-
-  return new Response(JSON.stringify(filtered), {
+  return new Response(JSON.stringify((trip.line) ? locationFilter(trip) : trip), {
     status: 200,
     headers: standardHeaders,
   });

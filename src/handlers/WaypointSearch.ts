@@ -32,7 +32,9 @@ async function getWaypointByTime(whattime: number | null): Promise<Waypoint | Er
   return request
     .then((response) => {
       if (response.status == 406) {
-        return Error('404: Waypoint Not Found');
+        // @TODO: waypoint_by_time gets the nearest waypoint to the requested
+        // time. How would that 406?
+        throw new Error('404: Waypoint Not Found');
       }
       return response.json();
     })
@@ -44,10 +46,7 @@ async function getWaypointByTime(whattime: number | null): Promise<Waypoint | Er
         return Error('500: JSON Parse Error');
       }
 
-      // @TODO: Record and translate other errors here.
-      console.log(error);
-
-      return Error('500: Unknown error in getWaypoint');
+      return error;
     });
 }
 

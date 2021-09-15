@@ -70,17 +70,17 @@ export class Waypoint {
       .then((response) => {
         if (response.status == 400) {
           // We sent shit to the database...
-          return Error('500: Bad request sent to server')
+          throw new Error('500: Bad request sent to server')
         }
         if (response.status == 401) {
-          return Error('401: Unauthorized by Database');
+          throw new Error('401: Unauthorized by Database');
         } else if (response.status == 409) {
           // We merge duplicates on primary key, so this shouldn't happen?
-          return Error('409: Conflict from Database');
+          throw new Error('409: Conflict from Database');
         } else if (response.status == 200 || response.status == 201) {
           return response.json();
         } else {
-          return Error('500: Unknown Error: ' + JSON.stringify(response));
+          throw new Error('500: Unknown Error: ' + JSON.stringify(response));
         }
       })
       .then((payload) => {

@@ -16,7 +16,9 @@ async function getLatestWaypoint(): Promise<Waypoint | Error> {
   return fetch(`${DB_ENDPOINT}/waypoints?limit=1`, { headers: requestHeaders })
     .then((response) => {
       if (response.status == 406) {
-        return Error('404: Waypoint Not Found');
+        // @TODO: The only way this could 406 at the database server is if the
+        // waypoint_data table is empty.
+        throw new Error('404: Waypoint Not Found');
       }
       return response.json();
     })
@@ -28,10 +30,7 @@ async function getLatestWaypoint(): Promise<Waypoint | Error> {
         return Error('500: JSON Parse Error');
       }
 
-      // @TODO: Record and translate other errors here.
-      console.log(error);
-
-      return Error('500: Unknown error in getWaypoint');
+      return error;
     });
 }
 

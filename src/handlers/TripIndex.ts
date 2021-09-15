@@ -19,7 +19,13 @@ async function getAllTrips(range: string | undefined): Promise<Trip[] | Error> {
   return fetch(`${DB_ENDPOINT}/trips?select=id,label,slug,start,end`, {
     headers: requestHeaders,
   })
-    .then((response) => response.json())
+    .then((response) => {
+      switch (response.status) {
+        case 502:
+          throw new Error('502: Bad Gateway, probably to PostgREST');
+      }
+      return response.json();
+    })
     .then((payload) => {
       return payload as Trip[];
     })
@@ -29,9 +35,7 @@ async function getAllTrips(range: string | undefined): Promise<Trip[] | Error> {
       }
 
       // @TODO: Record and translate other errors here.
-      console.log(error);
-
-      return Error('500: Unknown error in getAllTrips');
+      return error;
     });
 }
 
