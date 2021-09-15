@@ -10,11 +10,10 @@ const standardHeaders = new Headers({
 });
 
 async function getTrip(id: number): Promise<Trip | Error> {
-  // Tell PostgREST that we want a single object, not an array of one.
   const query = new Query({
     endpoint: `/trips?id=eq.${id}`,
     single: true
-  })
+  });
 
   return query.run()
     .then((payload) => {

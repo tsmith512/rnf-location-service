@@ -1,6 +1,7 @@
-import { Waypoint } from '../lib/Waypoint';
+import { Waypoint, WaypointProps } from '../lib/Waypoint';
 import { ReqWithParams } from '../lib/global';
 import { locationFilter } from '../lib/Filter';
+import { Query } from '../lib/Query';
 
 // @TODO: How to make this everywhere?
 const standardHeaders = new Headers({
@@ -9,28 +10,23 @@ const standardHeaders = new Headers({
 });
 
 async function getLatestWaypoint(): Promise<Waypoint | Error> {
-  // Tell PostgREST that we want a single object, not an array of one.
-  const requestHeaders = new Headers();
-  requestHeaders.append('Accept', 'application/vnd.pgrst.object+json');
+  const query = new Query({
+    endpoint: '/waypoints',
+    range: 1,
+    single: true,
+  });
 
-  return fetch(`${DB_ENDPOINT}/waypoints?limit=1`, { headers: requestHeaders })
-    .then((response) => {
-      if (response.status == 406) {
-        // @TODO: The only way this could 406 at the database server is if the
-        // waypoint_data table is empty.
-        throw new Error('404: Waypoint Not Found');
-      }
-      return response.json();
-    })
+  return query.run()
     .then((payload) => {
-      return new Waypoint(payload);
-    })
-    .catch((error) => {
-      if (error instanceof SyntaxError) {
-        return Error('500: JSON Parse Error');
+      if (payload instanceof Error) {
+        return payload;
       }
 
-      return error;
+      try {
+        return new Waypoint(payload as unknown as WaypointProps);
+      } catch {
+        return Error('500: Unable to process payload');
+      }
     });
 }
 
