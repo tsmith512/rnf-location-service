@@ -1,5 +1,6 @@
 import { Trip } from '../lib/Trip';
 import { ReqWithParams } from '../lib/global';
+import { Query } from '../lib/Query';
 
 // @TODO: How to make this everywhere?
 const standardHeaders = new Headers({
@@ -11,31 +12,22 @@ const standardHeaders = new Headers({
 // Also NB: random IP:Port combos not allowed. Must connect to a standard HTTP(S)
 // port on a named host in Cloudflare Worker world.
 async function getAllTrips(range: string | undefined): Promise<Trip[] | Error> {
-  const requestHeaders = new Headers();
-  if (range) {
-    requestHeaders.append('Range', range);
-  }
-
-  return fetch(`${DB_ENDPOINT}/trips?select=id,label,slug,start,end`, {
-    headers: requestHeaders,
+  const query = new Query({
+    endpoint: '/trips?select=id,label,slug,start,end',
+    range: (range) ? range : undefined,
+    single: false,
   })
-    .then((response) => {
-      switch (response.status) {
-        case 502:
-          throw new Error('502: Bad Gateway, probably to PostgREST');
-      }
-      return response.json();
-    })
+
+  return query.run()
     .then((payload) => {
-      return payload as Trip[];
-    })
-    .catch((error) => {
-      if (error instanceof SyntaxError) {
-        return Error('500: JSON Parse Error');
+      if (payload instanceof Error) {
+        return payload;
+      }
+      if (payload instanceof Array) {
+        return payload.map(t => new Trip(t));
       }
 
-      // @TODO: Record and translate other errors here.
-      return error;
+      return Error('500: Unable to process payload');
     });
 }
 
