@@ -1,6 +1,7 @@
 import { Trip, TripProps } from '../lib/Trip';
 import { ReqWithParams } from '../lib/global';
 import { locationFilter } from '../lib/Filter';
+import { Query } from '../lib/Query';
 
 // @TODO: How to make this everywhere?
 const standardHeaders = new Headers({
@@ -10,26 +11,22 @@ const standardHeaders = new Headers({
 
 async function getTrip(id: number): Promise<Trip | Error> {
   // Tell PostgREST that we want a single object, not an array of one.
-  const requestHeaders = new Headers();
-  requestHeaders.append('Accept', 'application/vnd.pgrst.object+json');
+  const query = new Query({
+    endpoint: `/trips?id=eq.${id}`,
+    single: true
+  })
 
-  return fetch(`${DB_ENDPOINT}/trips?id=eq.${id}`, { headers: requestHeaders })
-    .then((response) => {
-      // Add 502
-      if (response.status == 406) {
-        throw new Error('404: Trip Not Found');
-      }
-      return response.json();
-    })
+  return query.run()
     .then((payload) => {
-      return new Trip(payload);
-    })
-    .catch((error) => {
-      if (error instanceof SyntaxError) {
-        return new Error('500: JSON Parse Error');
+      if (payload instanceof Error) {
+        return payload;
       }
 
-      return error;
+      try {
+        return new Trip(payload as unknown as TripProps);
+      } catch {
+        return Error('500: Unable to process payload');
+      }
     });
 }
 

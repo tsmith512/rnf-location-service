@@ -30,6 +30,8 @@ export class Query {
     })
       .then((response) => {
         switch (response.status) {
+          case 406:
+            throw new Error('404: Record not found');
           case 502:
             throw new Error('502: Bad Gateway, probably to PostgREST');
           default:
