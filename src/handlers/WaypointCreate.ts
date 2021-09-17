@@ -1,11 +1,5 @@
 import { Waypoint, waypointBulkSave } from '../lib/Waypoint';
-import { RNFRequest } from '../lib/global';
-
-// @TODO: How to make this everywhere?
-const standardHeaders = new Headers({
-  'Access-Control-Allow-Origin': '*',
-  'Content-Type': 'application/json',
-});
+import { RNFRequest, standardHeaders } from '../lib/global';
 
 export async function WaypointCreate(request: RNFRequest): Promise<Response> {
   // Tasker [still...] records the data in a text file like this:
