@@ -41,9 +41,9 @@ export async function WaypointLatest(request: RNFRequest): Promise<Response> {
     });
   }
 
-  const filtered = locationFilter(waypoint);
+  const output = (request.auth === 'ADMIN') ? waypoint : locationFilter(waypoint);
 
-  return new Response(JSON.stringify(filtered), {
+  return new Response(JSON.stringify(output), {
     status: 200,
     headers: standardHeaders,
   });

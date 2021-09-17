@@ -41,8 +41,15 @@ export async function TripDetails(request: RNFRequest): Promise<Response> {
     });
   }
 
-  return new Response(JSON.stringify((trip.line) ? locationFilter(trip) : trip), {
-    status: 200,
-    headers: standardHeaders,
-  });
+  if (request.auth === 'ADMIN') {
+    return new Response(JSON.stringify(trip), {
+      status: 200,
+      headers: standardHeaders,
+    });
+  } else {
+    return new Response(JSON.stringify((trip.line) ? locationFilter(trip) : trip), {
+      status: 200,
+      headers: standardHeaders,
+    });
+  }
 }

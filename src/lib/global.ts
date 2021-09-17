@@ -5,4 +5,5 @@
  */
 export interface RNFRequest extends Request {
   params?: any;
+  auth?: string | null;
 }
