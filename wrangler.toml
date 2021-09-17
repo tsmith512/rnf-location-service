@@ -1,8 +1,8 @@
 name = "rnf-location-service"
 type = "javascript"
-zone_id = ""
+zone_id = "cb2e7aac346593483a4e3a8543cb6855"
 account_id = ""
-route = ""
+route = "api.routenotfound.com/*"
 workers_dev = true
 
 [build]
