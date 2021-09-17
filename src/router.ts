@@ -1,7 +1,6 @@
 import { Router } from 'itty-router';
 
 import {
-  HelloWorld,
   TripIndex,
   TripDetails,
   WaypointCreate,
@@ -14,7 +13,6 @@ const router = Router();
 
 router.all('*', authCheck);
 
-router.get('/waypoints', HelloWorld);
 router.post('/waypoint', requireAdmin, WaypointCreate);
 router.get('/waypoint', WaypointLatest);
 router.get('/waypoint/:whattime', WaypointSearch);
