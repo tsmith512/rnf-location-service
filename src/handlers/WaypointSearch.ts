@@ -1,5 +1,5 @@
 import { Waypoint, WaypointProps } from '../lib/Waypoint';
-import { ReqWithParams } from '../lib/global';
+import { RNFRequest } from '../lib/global';
 import { locationFilter } from '../lib/Filter';
 import { Query } from '../lib/Query';
 
@@ -30,7 +30,7 @@ async function getWaypointByTime(whattime: number): Promise<Waypoint | Error> {
   });
 }
 
-export async function WaypointSearch(request: ReqWithParams): Promise<Response> {
+export async function WaypointSearch(request: RNFRequest): Promise<Response> {
   if (!isFinite(request.params?.whattime)) {
     return new Response(JSON.stringify({ message: 'Timestamp search must be numeric' }), {
       status: 404,

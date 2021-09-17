@@ -1,5 +1,5 @@
 import { Waypoint, waypointBulkSave } from '../lib/Waypoint';
-import { ReqWithParams } from '../lib/global';
+import { RNFRequest } from '../lib/global';
 
 // @TODO: How to make this everywhere?
 const standardHeaders = new Headers({
@@ -7,7 +7,7 @@ const standardHeaders = new Headers({
   'Content-Type': 'application/json',
 });
 
-export async function WaypointCreate(request: ReqWithParams): Promise<Response> {
+export async function WaypointCreate(request: RNFRequest): Promise<Response> {
   // Tasker [still...] records the data in a text file like this:
   //   1-12-17,1484250000,30.123,-95.123
   //   1-12-18,1484260000,30.456,-95.456

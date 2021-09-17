@@ -1,5 +1,5 @@
 import { Trip } from '../lib/Trip';
-import { ReqWithParams } from '../lib/global';
+import { RNFRequest } from '../lib/global';
 import { Query } from '../lib/Query';
 
 // @TODO: How to make this everywhere?
@@ -27,7 +27,7 @@ async function getAllTrips(range: string | undefined): Promise<Trip[] | Error> {
     });
 }
 
-export async function TripIndex(request: ReqWithParams): Promise<Response> {
+export async function TripIndex(request: RNFRequest): Promise<Response> {
   const range = request.headers
     .get('Range')
     ?.match(/\d+-\d+/g)

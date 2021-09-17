@@ -1,5 +1,5 @@
 import { Trip, TripProps } from '../lib/Trip';
-import { ReqWithParams } from '../lib/global';
+import { RNFRequest } from '../lib/global';
 import { locationFilter } from '../lib/Filter';
 import { Query } from '../lib/Query';
 
@@ -29,7 +29,7 @@ async function getTrip(id: number): Promise<Trip | Error> {
     });
 }
 
-export async function TripDetails(request: ReqWithParams): Promise<Response> {
+export async function TripDetails(request: RNFRequest): Promise<Response> {
   const id = parseInt(request.params.id);
   const trip = await getTrip(id);
 

@@ -1,5 +1,5 @@
 import { Waypoint, WaypointProps } from '../lib/Waypoint';
-import { ReqWithParams } from '../lib/global';
+import { RNFRequest } from '../lib/global';
 import { locationFilter } from '../lib/Filter';
 import { Query } from '../lib/Query';
 
@@ -30,7 +30,7 @@ async function getLatestWaypoint(): Promise<Waypoint | Error> {
     });
 }
 
-export async function WaypointLatest(request: ReqWithParams): Promise<Response> {
+export async function WaypointLatest(request: RNFRequest): Promise<Response> {
   const waypoint = await getLatestWaypoint();
 
   if (waypoint instanceof Error) {
