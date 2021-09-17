@@ -1,0 +1,250 @@
+FORMAT: 1A
+HOST: http://www.example.com/v2
+
+# Location Tracker v2
+
+Rebuild of the original Location Tracker service for Route Not Found. With, hopefully, a cleaner API.
+
+Primary Inputs:
+
+- Location waypoints from Tasker
+- Trip information from TBD backend admin
+
+Primary Outputs:
+
+- Waypoint and trip data for WordPress
+- Debug and stats info for TBD backend admin
+
+Data:
+
+- A `waypoint` is a specific geographic location with a timestamp and, optionally, geocoded information
+- A `trip` is a date range and a name which collects waypoints
+
+**This describes the API endpoint exposed by the middleware,** not the API exposed by PostgreSQL/PostgREST that the middleware uses. Trying to make both sides match got weird.
+
+# Group Waypoints
+
+## Create Waypoint [/waypoint]
+
+### Create Waypoint [POST]
+
+**I want to completely change this. This method is still v1.**
+
+Updates should be queued client-side and submitted as a plain-text CSV file. Your API key must be submitted as a query argument; the CSV text goes in the body of the request.
+
+There is a Tasker task template in the repository in the `/tasker` directory to do this.
+
+HTTP Basic Authentication is required.
+
++ Request (text/plain)
+    + Headers
+    
+            Authorization: Basic basic-auth-encoded-string
+
+    + Attributes (object)
+        + date: `1-12-17` (string) - A human readable date marker; is ignored by parsing but useful for manual adjustment of queue files
+        + time: `1484250000` (number) - Unix timestamp.
+        + lat: `30.123` (number) - Latitude
+        + lon: `-95.123` (number) - Longitude
+
+    + Body
+
+            1-12-17,1484250000,30.123,-95.123
+            1-12-18,1484260000,30.456,-95.456
+
++ Response 201 (text/plain)
+
+    201: Record(s) created
+
+    + Body
+
+            Location recorded.
+
++ Response 200 (text/plain)
+
+    200: OK
+
+    + Body
+
+            Location received.
+
++ Response 400 (text/plain)
+
+    400: Could not parse input
+
+    + Body
+
+            Bad Request: Row contained malformed coordinates
+
++ Response 401 (text/plain)
+
+    401: Unauthorized
+
+    + Body
+
+            Unauthorized
+
+### Get Recent Waypoint [GET]
+
+Get the most recent waypoint available.
+
+HTTP Authorization header is optional. Without it, location data will be filtered.
+
++ Request
+    + Headers
+    
+            Authorization: Basic basic-auth-encoded-string
+
++ Response 200 (application/json)
+
+    + Attributes (Waypoint)
+
+## Waypoint at Time [/waypoint/{time}]
+
++ Parameters
+
+    + time (required, intiger, `1492536130`) ... A unix timestamp
+
+### Get check-in by time [GET]
+
+Returns a standard single waypoint object that is the closest to (earlier _or_ later) the requested time.
+
+HTTP Authorization header is optional. Without it, location data will be filtered.
+
++ Request
+    + Headers
+    
+            Authorization: Basic basic-auth-encoded-string
+
++ Response 200 (application/json)
+    + Attributes (Waypoint)
+
+
+# Group Trips
+
+Trips are manually created time-bound metadata to collect a series of Waypoints.
+
+## Trips Index [/trips]
+
+### Get list of Trips [GET]
+
+Returns an array of all trip objects **without** the GeoJSON `line` property.
+
++ Response 200 (application/json)
+    + Attributes (array[Trip])
+
+## Trip Details [/trip/{id}]
+
+### Get Trip details [GET]
+
+Get details about a particular trip, **including** the GeoJSON `line` property of coordinates within the trip's bounding timestamps.
+
+HTTP Authorization header is optional. Without it, location data will be filtered.
+
++ Parameters
+    + id (required, intiger, `2`) ... A trip ID
+
++ Request
+    + Headers
+    
+            Authorization: Basic basic-auth-encoded-string
+
++ Response 200 (application/json)
+    + Attributes (Trip)
+
++ Response 404 (text/plain)
+
+    + Body
+
+            Not Found: Trip ID not found
+
+# Group History
+
+## Full History [/history]
+
+### Full history as a line [GET /history/line]
+
+**For a `line` request:** A GeoJSON `LineString`. The coordinates array may be very long. All rows will be returned.
+
++ Request
+    + Parameters
+        + type: line
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "type": "LineString",
+                "properties": {
+                    "stroke": "#FF6633",
+                    "stroke-width": 2
+                },
+                "coordinates": [
+                    [
+                        -97.740,
+                        30.275
+                    ],
+                    [
+                        -97.740,
+                        30.275
+                    ]
+                ]
+            }
+
+### Full history as a collection of Points [GET]
+
+**For a `points` request:** A GeoJSON collection of `Features`, each of which is a `Point`. All rows will be returned.
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                -97.740,
+                                30.275
+                            ]
+                        }
+                    },
+                    {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                -97.740,
+                                30.275
+                            ]
+                        }
+                    }
+                ]
+            }
+
+# Group Stats
+
+_TBD_
+
+# Data Structures
+
+## Waypoint (object)
+
++ timestamp: `1484697627` (number) - Unix timestamp
++ lon: `-97.740` (number) - Longitude
++ lat: `30.275` (number) - Latitude
++ city: `Austin` (string) - Geocoded city, if any
++ admin: `Austin, TX, US` (string) - Most specific available place name
++ trips (array[Trip]) - Array of trips containing this Waypoint
+
+## Trip (object)
+
++ id: `1` (number) - Trip ID
++ label: `Pacific Coast Roadtrip` (string) - Presentable trip title
++ slug: `pacific_coast_roadtrip` (string) - Slugified trip title
++ start: `1440783004` (number) - Unix timestamp for trip start
++ end: `1442329222` (number) - Unix timestamp for trip end
++ line (object) - GeoJSON trip line
