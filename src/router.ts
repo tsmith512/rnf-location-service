@@ -8,14 +8,14 @@ import {
   WaypointSearch,
   WaypointLatest,
 } from './handlers';
-import { authCheck } from './lib/Auth';
+import { authCheck, requireAdmin } from './lib/Auth';
 
 const router = Router();
 
-router.get('*', authCheck);
+router.all('*', authCheck);
 
 router.get('/waypoints', HelloWorld);
-router.post('/waypoint', WaypointCreate);
+router.post('/waypoint', requireAdmin, WaypointCreate);
 router.get('/waypoint', WaypointLatest);
 router.get('/waypoint/:whattime', WaypointSearch);
 router.get('/trips/', TripIndex);

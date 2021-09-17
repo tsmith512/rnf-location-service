@@ -33,7 +33,10 @@ const CREDENTIALS_REGEXP = /^ *(?:[Bb][Aa][Ss][Ii][Cc]) +([A-Za-z0-9._~+/-]+=*) 
 const USER_PASS_REGEXP = /^([^:]*):(.*)$/;
 
 /**
- * Parse basic auth to object.
+ * Parse the Authorization header for an HTTP Basic credentials pair.
+ *
+ * @param input (string) the entire Authorizatio header ("Basic xyz123")
+ * @returns credentials pair or false if not determined for any reason
  */
 const parseAuth = (input: string): credentials | false => {
 
@@ -81,5 +84,23 @@ export function authCheck(request: RNFRequest) {
     if (credentials) {
       request.auth = isAdmin(credentials) ? 'ADMIN' : 'PUBLIC';
     }
+  }
+}
+
+/**
+ * Middleware to terminate a request with 401 if it's not me.
+ *
+ * @param request (RNFRequest) which should now have an auth property
+ * @returns
+ */
+export function requireAdmin(request: RNFRequest) {
+  if (request.auth !== 'ADMIN') {
+    return new Response('Unauthorized', {
+      status: 401,
+      headers: {
+        'Content-Type': 'text/plain',
+        'WWW-Authenticate': 'Basic realm="rnf-location-service API"',
+      },
+    });
   }
 }
