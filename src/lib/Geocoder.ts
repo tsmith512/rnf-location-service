@@ -39,7 +39,6 @@ export class Geocoder {
 
     if (results instanceof Error) {
       // Uhhhh?
-      console.log(results);
       return Error('500: fetchReverseGeo threw an error');
     }
 
@@ -70,8 +69,6 @@ export class Geocoder {
         if (error instanceof SyntaxError) {
           return Error('500: JSON Parse Error');
         }
-
-        console.log(error);
 
         return Error('500: Unknown error in Reverse Geocode Request')
       });

@@ -44,8 +44,6 @@ export function locationFilter(input: Waypoint | Trip) {
   } else if (input instanceof Trip) {
     const filteredLine = input.line.coordinates.map((coords: Array<number>) => filterCoords(coords));
     input.line.coordinates = filteredLine;
-  } else {
-    console.log('Input is neither a Waypoint or a Trip');
   }
 
   return input;
