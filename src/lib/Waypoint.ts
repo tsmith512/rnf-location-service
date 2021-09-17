@@ -1,4 +1,5 @@
 import { Geocoder, GeocoderResponse } from "./Geocoder";
+import { Query } from "./Query";
 
 export interface WaypointProps {
   timestamp: number;
@@ -45,13 +46,6 @@ export class Waypoint {
   }
 
   async save() {
-    const requestHeaders = new Headers({
-      'Authorization': `Bearer ${DB_ADMIN_JWT}`,
-      'Prefer': 'resolution=merge-duplicates,return=representation',
-      'Content-Type': 'application/json',
-      'Accept': 'application/vnd.pgrst.object+json',
-    });
-
     const payload = [{
       timestamp: this.timestamp,
       point: `POINT(${this.lon} ${this.lat})`,
@@ -62,40 +56,26 @@ export class Waypoint {
       geocode_results: this.geocode_results || null,
     }];
 
-    return fetch(`${DB_ENDPOINT}/waypoint_data`, {
-      method: 'POST',
-      headers: requestHeaders,
-      body: JSON.stringify(payload),
-    })
-      .then((response) => {
-        if (response.status == 400) {
-          // We sent shit to the database...
-          throw new Error('500: Bad request sent to server')
-        }
-        if (response.status == 401) {
-          throw new Error('401: Unauthorized by Database');
-        } else if (response.status == 409) {
-          // We merge duplicates on primary key, so this shouldn't happen?
-          throw new Error('409: Conflict from Database');
-        } else if (response.status == 200 || response.status == 201) {
-          return response.json();
-        } else {
-          throw new Error('500: Unknown Error: ' + JSON.stringify(response));
-        }
-      })
+    const query = new Query({
+      endpoint: '/waypoint_data',
+      admin: true,
+      single: true,
+      upsert: true,
+      body: payload,
+    });
+
+    return query.run()
       .then((payload) => {
-        // @TODO: We might have a valid JSON payload from the server which
-        // includes a database error or some weirdness
-        Object.assign(this, payload);
-        return true;
-      })
-      .catch((error) => {
-        if (error instanceof SyntaxError) {
-          return Error('500: JSON Parse Error');
+        if (payload instanceof Error) {
+          return payload;
         }
 
-        console.log(error.message);
-        return false;
+        try {
+          Object.assign(this, payload);
+          return true;
+        } catch {
+          return Error('500: Unable to process payload');
+        }
       });
   }
 }
@@ -105,12 +85,6 @@ export class Waypoint {
 // Waypoint objects because we don't necessarily know what order they'll come
 // back in
 export async function waypointBulkSave(waypoints: Waypoint[]): Promise<number | Error> {
-  const requestHeaders = new Headers({
-    'Authorization': `Bearer ${DB_ADMIN_JWT}`,
-    'Prefer': 'resolution=merge-duplicates,return=representation',
-    'Content-Type': 'application/json',
-  });
-
   const payload = [];
 
   for (const waypoint of waypoints) {
@@ -125,38 +99,23 @@ export async function waypointBulkSave(waypoints: Waypoint[]): Promise<number | 
     });
   }
 
-  return fetch(`${DB_ENDPOINT}/waypoint_data`, {
-    method: 'POST',
-    headers: requestHeaders,
-    body: JSON.stringify(payload),
-  })
-    .then((response) => {
-      if (response.status == 400) {
-        // We sent shit to the database...
-        return Error('500: Bad request sent to server')
-      }
-      if (response.status == 401) {
-        return Error('401: Unauthorized by Database');
-      } else if (response.status == 409) {
-        // We merge duplicates on primary key, so this shouldn't happen?
-        return Error('409: Conflict from Database');
-      } else if (response.status == 200 || response.status == 201) {
-        return response.json();
-      } else {
-        return Error('500: Unknown Error: ' + JSON.stringify(response));
-      }
-    })
+  const query = new Query({
+    endpoint: '/waypoint_data',
+    admin: true,
+    upsert: true,
+    body: payload,
+  });
+
+  return query.run()
     .then((payload) => {
-      // @TODO: We might have a valid JSON payload from the server which
-      // includes a database error or some weirdness
-      return payload.length;
-    })
-    .catch((error) => {
-      if (error instanceof SyntaxError) {
-        return Error('500: JSON Parse Error');
+      if (payload instanceof Error) {
+        return payload;
+      } else if (payload instanceof Array) {
+        return payload.length;
       }
 
-      console.log(error.message);
-      return Error('500: Unknown error in waypointBulkSave');
+      // @TODO: We might have a valid JSON payload from the server which
+      // includes a database error or some weirdness.
+      return 0;
     });
 }

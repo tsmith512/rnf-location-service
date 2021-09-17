@@ -1,7 +1,9 @@
 export interface QueryProps {
-  range?: string | number | undefined;
+  admin?: boolean;
   endpoint: string;
-  single: boolean;
+  range?: string | number | undefined;
+  single?: boolean;
+  upsert?: boolean;
   body?: object;
 }
 
@@ -16,6 +18,11 @@ export class Query {
     this.reqHeaders = new Headers();
     this.endpoint = DB_ENDPOINT + props.endpoint;
     this.method = (props.body) ? 'POST' : 'GET';
+
+    // @TODO: Uhhhh this feels a little informal.
+    if (props.admin) {
+      this.reqHeaders.append('Authorization', `Bearer ${DB_ADMIN_JWT}`);
+    }
 
     if (props.body) {
       this.body = JSON.stringify(props.body) || undefined;
@@ -35,6 +42,10 @@ export class Query {
     if (props.single) {
       this.reqHeaders.append('Accept', 'application/vnd.pgrst.object+json');
     }
+
+    if (props.upsert) {
+      this.reqHeaders.append('Prefer', 'resolution=merge-duplicates,return=representation');
+    }
   }
 
   async run(): Promise<JSON | Error> {
@@ -45,10 +56,18 @@ export class Query {
     })
       .then((response) => {
         switch (response.status) {
+          case 400:
+            throw new Error('400: Bad request sent to server');
+          case 401:
+            throw new Error('401: Unauthorized by database');
           case 404:
             throw new Error('404: Database error');
           case 406:
             throw new Error('404: Record not found');
+          case 409:
+            throw new Error('409: Unresolved conflict in database');
+          case 500:
+            throw new Error('500: Unexpected database server error -- ' + JSON.stringify(response));
           case 502:
             throw new Error('502: Bad Gateway, probably to PostgREST');
           default:

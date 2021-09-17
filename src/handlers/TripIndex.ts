@@ -12,7 +12,6 @@ async function getAllTrips(range: string | undefined): Promise<Trip[] | Error> {
   const query = new Query({
     endpoint: '/trips?select=id,label,slug,start,end',
     range: (range) ? range : undefined,
-    single: false,
   });
 
   return query.run()
