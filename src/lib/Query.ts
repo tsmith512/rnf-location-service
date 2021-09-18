@@ -71,8 +71,13 @@ export class Query {
           case 502:
             throw new Error('502: Bad Gateway, probably to PostgREST');
           default:
-            return response.json();
+            return response.text();
         }
+      })
+      .then((text) => {
+        // Rather than response.json() directly, hook in here with .text()
+        // for debugging. Cloudflare Firewall errors come back as text.
+        return JSON.parse(text);
       })
       .catch((error) => {
         if (error instanceof SyntaxError) {
