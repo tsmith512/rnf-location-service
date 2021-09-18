@@ -46,7 +46,7 @@ export async function WaypointCreate(request: RNFRequest): Promise<Response> {
     return new Response(JSON.stringify(saves), {
       status: 500,
       headers: standardHeaders,
-    })
+    });
   }
 
   // @TODO: So if we didn't get a save confirmation for each record we tried to
