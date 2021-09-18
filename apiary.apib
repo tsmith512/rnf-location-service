@@ -133,6 +133,22 @@ Returns an array of all trip objects **without** the GeoJSON `line` property.
 + Response 200 (application/json)
     + Attributes (array[Trip])
 
+## Create Trip [/trip]
+
+### Create Trip [POST]
+
+Post trip proprties to be saved to the DB. This endpoint operates as an upsert, so updates can be posted here, too. The return payload will include the trip ID.
+
+HTTP Basic Authentication is required.
+
++ Request (text/plain)
+    + Headers
+    
+            Authorization: Basic basic-auth-encoded-string
+
++ Response 201 (application/json)
+    + Attributes (Trip)
+
 ## Trip Details [/trip/{id}]
 
 ### Get Trip details [GET]
