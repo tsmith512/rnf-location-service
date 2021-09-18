@@ -2,12 +2,21 @@ import { Waypoint } from "../lib/Waypoint";
 import { RNFRequest, standardHeaders } from '../lib/global';
 import { Query } from '../lib/Query';
 
-async function getAllWaypoints(range: string | undefined): Promise<Waypoint[] | Error> {
+interface allWaypointsQueryProps {
+  range?: string;
+  missingGeo?: boolean;
+}
+
+export async function getAllWaypoints(props: allWaypointsQueryProps): Promise<Waypoint[] | Error> {
   const query = new Query({
     endpoint: '/waypoints_all',
-    range: (range) ? range : undefined,
+    range: props.range,
     admin: true,
   });
+
+  if (props.missingGeo) {
+    query.endpoint += '?geocode_attempts=eq.0';
+  }
 
   return query.run()
     .then((payload) => {
@@ -27,7 +36,7 @@ export async function WaypointIndex(request: RNFRequest): Promise<Response> {
     ?.match(/\d+-\d+/g)
     ?.pop();
 
-  const waypoints = await getAllWaypoints(range);
+  const waypoints = await getAllWaypoints({range: range});
 
   if (waypoints instanceof Error) {
     const [code, message] = waypoints.message?.split(': ');

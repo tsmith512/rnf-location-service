@@ -10,6 +10,7 @@ import {
   WaypointIndex,
 } from './handlers';
 import { authCheck, requireAdmin } from './lib/Auth';
+import { fillMissingGeocode } from './util';
 
 const router = Router();
 
@@ -26,6 +27,10 @@ router.get('/waypoint/:whattime', WaypointSearch);
 router.get('/trips', TripIndex);
 router.post('/trip', requireAdmin, TripCreate);
 router.get('/trip/:id', TripDetails);
+
+router.get('/geocode-test', (request) => {
+  return fillMissingGeocode(5);
+});
 
 // Catch-all 404
 router.get('*', (request) => new Response('Route Not Found', {
