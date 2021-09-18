@@ -35,10 +35,19 @@ export async function WaypointCreate(request: RNFRequest): Promise<Response> {
 
   const saves = await waypointBulkSave(waypoints);
 
+  // @TODO: Make this happen in all handlers. This endpoint would send a 200 to
+  // the client when it got a 403 trying to save stuff.
+  if (saves instanceof Error) {
+    return new Response(JSON.stringify(saves), {
+      status: 500,
+      headers: standardHeaders,
+    })
+  }
+
   // @TODO: So if we didn't get a save confirmation for each record we tried to
   // make... what do we do? v1 also provided this distinction but never did
   // anything about it. :upside_down_face:
-  const status = (saves == waypoints.length) ? 201 : 200;
+  const status = (saves === waypoints.length) ? 201 : 200;
 
   return new Response(JSON.stringify(waypoints), {
     status: status,
