@@ -140,6 +140,22 @@ CREATE TABLE public.waypoint_data (
 
 
 --
+-- Name: waypoints_all; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.waypoints_all AS
+ SELECT waypoint_data."timestamp",
+    public.st_x((waypoint_data.point)::public.geometry) AS lon,
+    public.st_y((waypoint_data.point)::public.geometry) AS lat,
+    waypoint_data.label,
+    waypoint_data.state,
+    waypoint_data.country,
+    waypoint_data.geocode_attempts
+   FROM public.waypoint_data
+  ORDER BY waypoint_data."timestamp" DESC;
+
+
+--
 -- Name: trip_data id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -285,5 +301,13 @@ GRANT ALL ON TABLE public.waypoint_data TO rnf;
 
 
 --
+-- Name: TABLE waypoints_all; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.waypoints_all TO admin_requests;
+
+
+--
 -- PostgreSQL database dump complete
 --
+
