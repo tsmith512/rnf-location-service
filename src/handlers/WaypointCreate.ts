@@ -28,10 +28,15 @@ export async function WaypointCreate(request: RNFRequest): Promise<Response> {
     }
   });
 
-  // This awaits geocoding on all of them, which is cool but bad for a long list
-  await Promise.all(waypoints.map(async (p) => {
-    await p.geocode();
-  }));
+  // If we get a few, geocode each. Otherwise only geocode the last one,
+  // and punt the rest to cron and on-demand.
+  if (waypoints.length < 5) {
+    await Promise.all(waypoints.map(async (p) => {
+      await p.geocode();
+    }));
+  } else {
+    await waypoints[waypoints.length - 1].geocode();
+  }
 
   const saves = await waypointBulkSave(waypoints);
 
