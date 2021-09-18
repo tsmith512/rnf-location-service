@@ -17,26 +17,6 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: rnf_staging; Type: DATABASE; Schema: -; Owner: -
---
-
-CREATE DATABASE rnf_staging WITH TEMPLATE = template0 ENCODING = 'UTF8' LC_COLLATE = 'C.UTF-8' LC_CTYPE = 'C.UTF-8';
-
-
-\connect rnf_staging
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
-
---
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
 --
 
@@ -76,6 +56,7 @@ SELECT
     NULL::text AS label,
     NULL::text AS state,
     NULL::text AS country,
+    NULL::integer AS geocode_attempts,
     NULL::integer[] AS trips;
 
 
@@ -159,6 +140,22 @@ CREATE TABLE public.waypoint_data (
 
 
 --
+-- Name: waypoints_all; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.waypoints_all AS
+ SELECT waypoint_data."timestamp",
+    public.st_x((waypoint_data.point)::public.geometry) AS lon,
+    public.st_y((waypoint_data.point)::public.geometry) AS lat,
+    waypoint_data.label,
+    waypoint_data.state,
+    waypoint_data.country,
+    waypoint_data.geocode_attempts
+   FROM public.waypoint_data
+  ORDER BY waypoint_data."timestamp" DESC;
+
+
+--
 -- Name: trip_data id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -192,6 +189,7 @@ CREATE OR REPLACE VIEW public.waypoints AS
     w.label,
     w.state,
     w.country,
+    w.geocode_attempts,
     array_agg(t.id) AS trips
    FROM (public.waypoint_data w
      LEFT JOIN public.trips t ON (((w."timestamp" >= t.start) AND (w."timestamp" <= t."end"))))
@@ -213,7 +211,8 @@ CREATE OR REPLACE VIEW public.trips AS
     (public.st_asgeojson(public.st_makeline((w.point)::public.geometry ORDER BY w."timestamp")))::jsonb AS line
    FROM (public.trip_data t
      LEFT JOIN public.waypoint_data w ON (((w."timestamp" >= t.start) AND (w."timestamp" <= t."end"))))
-  GROUP BY t.id;
+  GROUP BY t.id
+  ORDER BY t.id;
 
 
 --
@@ -299,6 +298,13 @@ GRANT SELECT,USAGE ON SEQUENCE public.trips_id_seq TO admin_requests;
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.waypoint_data TO admin_requests;
 GRANT ALL ON TABLE public.waypoint_data TO rnf;
+
+
+--
+-- Name: TABLE waypoints_all; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.waypoints_all TO admin_requests;
 
 
 --
