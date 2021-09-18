@@ -9,6 +9,7 @@ export interface WaypointProps {
   label?: string;
   state?: string;
   country?: string;
+  geocode_attempts?: number;
 }
 
 export class Waypoint {
@@ -24,7 +25,10 @@ export class Waypoint {
 
   constructor(props: WaypointProps) {
     Object.assign(this, props);
-    this.geocode_attempts = 0;
+
+    if (!props.geocode_attempts) {
+      this.geocode_attempts = 0;
+    }
   }
 
   async geocode() {
