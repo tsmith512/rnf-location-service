@@ -1,11 +1,17 @@
 name = "rnf-location-service"
 type = "javascript"
-zone_id = ""
+zone_id = "cb2e7aac346593483a4e3a8543cb6855"
 account_id = ""
-route = ""
 workers_dev = true
+compatibility_date = "2021-09-18"
 
 [build]
 command = "npm install && npm run build"
 [build.upload]
 format = "service-worker"
+
+[vars]
+GMAPS_API_ENDPOINT = "https://maps.googleapis.com/maps/api/geocode/json"
+
+[env.production]
+route = "api.routenotfound.com/*"
