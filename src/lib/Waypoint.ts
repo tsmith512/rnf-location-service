@@ -41,8 +41,6 @@ export class Waypoint {
       this.geocode_results = results;
       return true;
     }
-
-    // @TODO: Save to DB?? Or prepare a batch in WaypointCreate?
   }
 
   async save() {

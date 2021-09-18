@@ -35,6 +35,12 @@ export async function WaypointLatest(request: RNFRequest): Promise<Response> {
     });
   }
 
+  // If this hasn't been geocoded yet, do it.
+  if (waypoint.geocode_attempts == 0) {
+    console.log('doing a lookup');
+    await waypoint.geocode().then((result) => { waypoint.save(); });
+  }
+
   const output = (request.auth === 'ADMIN') ? waypoint : locationFilter(waypoint);
 
   return new Response(JSON.stringify(output), {
