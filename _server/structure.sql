@@ -76,6 +76,7 @@ SELECT
     NULL::text AS label,
     NULL::text AS state,
     NULL::text AS country,
+    NULL::integer AS geocode_attempts,
     NULL::integer[] AS trips;
 
 
@@ -192,6 +193,7 @@ CREATE OR REPLACE VIEW public.waypoints AS
     w.label,
     w.state,
     w.country,
+    w.geocode_attempts,
     array_agg(t.id) AS trips
    FROM (public.waypoint_data w
      LEFT JOIN public.trips t ON (((w."timestamp" >= t.start) AND (w."timestamp" <= t."end"))))
@@ -305,4 +307,3 @@ GRANT ALL ON TABLE public.waypoint_data TO rnf;
 --
 -- PostgreSQL database dump complete
 --
-
