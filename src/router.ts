@@ -7,6 +7,7 @@ import {
   WaypointSearch,
   WaypointLatest,
   TripCreate,
+  WaypointIndex,
 } from './handlers';
 import { authCheck, requireAdmin } from './lib/Auth';
 
@@ -16,6 +17,7 @@ const router = Router();
 router.all('*', authCheck);
 
 // Waypoint related
+router.get('/waypoints', requireAdmin, WaypointIndex);
 router.post('/waypoint', requireAdmin, WaypointCreate);
 router.get('/waypoint', WaypointLatest);
 router.get('/waypoint/:whattime', WaypointSearch);

@@ -59,7 +59,7 @@ export class Query {
           case 400:
             throw new Error('400: Bad request sent to server');
           case 401:
-            throw new Error('401: Unauthorized by database');
+            throw new Error('403: Unauthorized by database');
           case 404:
             throw new Error('404: Database error');
           case 406:
