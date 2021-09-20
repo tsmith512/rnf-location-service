@@ -1,13 +1,7 @@
 import { Trip, TripProps } from '../lib/Trip';
-import { RNFRequest } from '../lib/global';
+import { RNFRequest, standardHeaders } from '../lib/global';
 import { locationFilter } from '../lib/Filter';
 import { Query } from '../lib/Query';
-
-// @TODO: How to make this everywhere?
-const standardHeaders = new Headers({
-  'Access-Control-Allow-Origin': '*',
-  'Content-Type': 'application/json',
-});
 
 async function getTrip(id: number): Promise<Trip | Error> {
   const query = new Query({

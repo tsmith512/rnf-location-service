@@ -1,11 +1,5 @@
 import { Waypoint, waypointBulkSave } from '../lib/Waypoint';
-import { RNFRequest } from '../lib/global';
-
-// @TODO: How to make this everywhere?
-const standardHeaders = new Headers({
-  'Access-Control-Allow-Origin': '*',
-  'Content-Type': 'application/json',
-});
+import { RNFRequest, standardHeaders } from '../lib/global';
 
 export async function WaypointCreate(request: RNFRequest): Promise<Response> {
   // Tasker [still...] records the data in a text file like this:
@@ -34,17 +28,31 @@ export async function WaypointCreate(request: RNFRequest): Promise<Response> {
     }
   });
 
-  // This awaits geocoding on all of them, which is cool but bad for a long list
-  await Promise.all(waypoints.map(async (p) => {
-    await p.geocode();
-  }));
+  // If we get a few, geocode each. Otherwise only geocode the last one,
+  // and punt the rest to cron and on-demand.
+  if (waypoints.length < 5) {
+    await Promise.all(waypoints.map(async (p) => {
+      await p.geocode();
+    }));
+  } else {
+    await waypoints[waypoints.length - 1].geocode();
+  }
 
   const saves = await waypointBulkSave(waypoints);
+
+  // @TODO: Make this happen in all handlers. This endpoint would send a 200 to
+  // the client when it got a 403 trying to save stuff.
+  if (saves instanceof Error) {
+    return new Response(JSON.stringify(saves), {
+      status: 500,
+      headers: standardHeaders,
+    });
+  }
 
   // @TODO: So if we didn't get a save confirmation for each record we tried to
   // make... what do we do? v1 also provided this distinction but never did
   // anything about it. :upside_down_face:
-  const status = (saves == waypoints.length) ? 201 : 200;
+  const status = (saves === waypoints.length) ? 201 : 200;
 
   return new Response(JSON.stringify(waypoints), {
     status: status,

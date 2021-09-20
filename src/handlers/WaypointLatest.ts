@@ -1,13 +1,7 @@
 import { Waypoint, WaypointProps } from '../lib/Waypoint';
-import { RNFRequest } from '../lib/global';
+import { RNFRequest, standardHeaders } from '../lib/global';
 import { locationFilter } from '../lib/Filter';
 import { Query } from '../lib/Query';
-
-// @TODO: How to make this everywhere?
-const standardHeaders = new Headers({
-  'Access-Control-Allow-Origin': '*',
-  'Content-Type': 'application/json',
-});
 
 async function getLatestWaypoint(): Promise<Waypoint | Error> {
   const query = new Query({
@@ -39,6 +33,11 @@ export async function WaypointLatest(request: RNFRequest): Promise<Response> {
       status: parseInt(code),
       headers: standardHeaders,
     });
+  }
+
+  // If this hasn't been geocoded yet, do it.
+  if (waypoint.geocode_attempts == 0) {
+    await waypoint.geocode().then((result) => { waypoint.save(); });
   }
 
   const output = (request.auth === 'ADMIN') ? waypoint : locationFilter(waypoint);

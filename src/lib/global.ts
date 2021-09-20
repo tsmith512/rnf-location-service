@@ -7,3 +7,11 @@ export interface RNFRequest extends Request {
   params?: any;
   auth?: string | null;
 }
+
+/**
+ * All responses start with at least these unless something special is happening
+ */
+export const standardHeaders = new Headers({
+  'Access-Control-Allow-Origin': '*',
+  'Content-Type': 'application/json',
+});
