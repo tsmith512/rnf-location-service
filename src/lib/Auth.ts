@@ -2,7 +2,7 @@
 // really accommodate an auth header that isn't HTTP Basic auth. And over HTTPS
 // it'll be fine.
 
-import { RNFRequest } from "./global";
+import { corsHeaders, RNFRequest } from "./global";
 
 // Adapted from dommmel/cloudflare-workers-basic-auth
 
@@ -100,6 +100,7 @@ export function requireAdmin(request: RNFRequest) {
       headers: {
         'Content-Type': 'text/plain',
         'WWW-Authenticate': 'Basic realm="rnf-location-service API"',
+        ...corsHeaders,
       },
     });
   }

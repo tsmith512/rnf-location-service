@@ -10,6 +10,7 @@ import {
   WaypointIndex,
 } from './handlers';
 import { authCheck, requireAdmin } from './lib/Auth';
+import { corsHeaders } from './lib/global';
 import { fillMissingGeocode } from './util';
 
 const router = Router();
@@ -32,18 +33,25 @@ router.get('/geocode-test', (request) => {
   return fillMissingGeocode(5);
 });
 
+// Options / Preflight
+router.options('*', (request) => new Response(null, {
+  headers: corsHeaders,
+}));
+
 // Catch-all 404
 router.get('*', (request) => new Response('Route Not Found', {
   status: 404,
   headers: {
-    'Content-Type': 'text/plain'
+    'Content-Type': 'text/plain',
+    ...corsHeaders,
   },
 }));
 
 router.post('*', (request) => new Response('Method Not Allowed', {
   status: 405,
   headers: {
-    'Content-Type': 'text/plain'
+    'Content-Type': 'text/plain',
+    ...corsHeaders,
   },
 }));
 

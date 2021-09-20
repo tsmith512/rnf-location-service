@@ -8,10 +8,16 @@ export interface RNFRequest extends Request {
   auth?: string | null;
 }
 
+export const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Max-Age': '86400',
+};
+
 /**
  * All responses start with at least these unless something special is happening
  */
-export const standardHeaders = new Headers({
-  'Access-Control-Allow-Origin': '*',
+export const standardHeaders = {
   'Content-Type': 'application/json',
-});
+  ...corsHeaders,
+};
