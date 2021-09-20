@@ -101,7 +101,8 @@ SELECT
     NULL::character varying(50) AS slug,
     NULL::integer AS start,
     NULL::integer AS "end",
-    NULL::jsonb AS line;
+    NULL::jsonb AS line,
+    NULL::public.box2d AS boundaries;
 
 
 --
@@ -208,7 +209,8 @@ CREATE OR REPLACE VIEW public.trips AS
     t.slug,
     t.start,
     t."end",
-    (public.st_asgeojson(public.st_makeline((w.point)::public.geometry ORDER BY w."timestamp")))::jsonb AS line
+    (public.st_asgeojson(public.st_makeline((w.point)::public.geometry ORDER BY w."timestamp")))::jsonb AS line,
+    public.st_extent((w.point)::public.geometry) AS boundaries
    FROM (public.trip_data t
      LEFT JOIN public.waypoint_data w ON (((w."timestamp" >= t.start) AND (w."timestamp" <= t."end"))))
   GROUP BY t.id
