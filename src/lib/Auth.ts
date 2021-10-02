@@ -2,7 +2,7 @@
 // really accommodate an auth header that isn't HTTP Basic auth. And over HTTPS
 // it'll be fine.
 
-import { corsHeaders, RNFRequest } from "./global";
+import { corsHeaders, RNFRequest } from './global';
 
 // Adapted from dommmel/cloudflare-workers-basic-auth
 
@@ -10,7 +10,6 @@ interface credentials {
   username: string;
   password: string;
 }
-
 
 /**
  * RegExp for basic auth credentials
@@ -22,13 +21,13 @@ interface credentials {
 
 const CREDENTIALS_REGEXP = /^ *(?:[Bb][Aa][Ss][Ii][Cc]) +([A-Za-z0-9._~+/-]+=*) *$/;
 
- /**
-  * RegExp for basic auth user/pass
-  *
-  * user-pass   = userid ":" password
-  * userid      = *<TEXT excluding ":">
-  * password    = *TEXT
-  */
+/**
+ * RegExp for basic auth user/pass
+ *
+ * user-pass   = userid ":" password
+ * userid      = *<TEXT excluding ":">
+ * password    = *TEXT
+ */
 
 const USER_PASS_REGEXP = /^([^:]*):(.*)$/;
 
@@ -39,7 +38,6 @@ const USER_PASS_REGEXP = /^([^:]*):(.*)$/;
  * @returns credentials pair or false if not determined for any reason
  */
 const parseAuth = (input: string): credentials | false => {
-
   const payload = CREDENTIALS_REGEXP.exec(input);
 
   if (!payload) {
@@ -55,9 +53,9 @@ const parseAuth = (input: string): credentials | false => {
   // return credentials object
   return {
     username: creds[1],
-    password: creds[2]
+    password: creds[2],
   };
-}
+};
 
 /**
  * Short and sweet. Either the API is serving me (phone or admin view) or it's a
@@ -67,7 +65,7 @@ const parseAuth = (input: string): credentials | false => {
  * @returns (bool) am I me?
  */
 const isAdmin = (user: credentials): boolean =>
-  (user.username == API_ADMIN_USER && user.password == API_ADMIN_PASS);
+  user.username == API_ADMIN_USER && user.password == API_ADMIN_PASS;
 
 /**
  * Middleware to add an auth property to the RNFRequest that'll get passed to
@@ -76,7 +74,7 @@ const isAdmin = (user: credentials): boolean =>
  * @param request
  */
 export function authCheck(request: RNFRequest) {
-  const authHeader = request.headers.get("Authorization");
+  const authHeader = request.headers.get('Authorization');
 
   if (authHeader) {
     const credentials = parseAuth(authHeader);

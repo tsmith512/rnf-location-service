@@ -31,9 +31,11 @@ export async function WaypointCreate(request: RNFRequest): Promise<Response> {
   // If we get a few, geocode each. Otherwise only geocode the last one,
   // and punt the rest to cron and on-demand.
   if (waypoints.length < 5) {
-    await Promise.all(waypoints.map(async (p) => {
-      await p.geocode();
-    }));
+    await Promise.all(
+      waypoints.map(async (p) => {
+        await p.geocode();
+      })
+    );
   } else {
     await waypoints[waypoints.length - 1].geocode();
   }
@@ -52,7 +54,7 @@ export async function WaypointCreate(request: RNFRequest): Promise<Response> {
   // @TODO: So if we didn't get a save confirmation for each record we tried to
   // make... what do we do? v1 also provided this distinction but never did
   // anything about it. :upside_down_face:
-  const status = (saves === waypoints.length) ? 201 : 200;
+  const status = saves === waypoints.length ? 201 : 200;
 
   return new Response(JSON.stringify(waypoints), {
     status: status,

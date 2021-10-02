@@ -17,7 +17,7 @@ export class Query {
   constructor(props: QueryProps) {
     this.reqHeaders = new Headers();
     this.endpoint = DB_ENDPOINT + props.endpoint;
-    this.method = (props.body) ? 'POST' : 'GET';
+    this.method = props.body ? 'POST' : 'GET';
 
     // @TODO: Uhhhh this feels a little informal.
     if (props.admin) {
@@ -26,7 +26,7 @@ export class Query {
 
     if (props.body) {
       this.body = JSON.stringify(props.body) || undefined;
-      this.reqHeaders.append('Content-Type', 'application/json;charset=UTF-8')
+      this.reqHeaders.append('Content-Type', 'application/json;charset=UTF-8');
     }
 
     if (typeof props.range == 'string') {
@@ -44,7 +44,10 @@ export class Query {
     }
 
     if (props.upsert) {
-      this.reqHeaders.append('Prefer', 'resolution=merge-duplicates,return=representation');
+      this.reqHeaders.append(
+        'Prefer',
+        'resolution=merge-duplicates,return=representation'
+      );
     }
   }
 
@@ -67,7 +70,9 @@ export class Query {
           case 409:
             throw new Error('409: Unresolved conflict in database');
           case 500:
-            throw new Error('500: Unexpected database server error -- ' + JSON.stringify(response));
+            throw new Error(
+              '500: Unexpected database server error -- ' + JSON.stringify(response)
+            );
           case 502:
             throw new Error('502: Bad Gateway, probably to PostgREST');
           default:

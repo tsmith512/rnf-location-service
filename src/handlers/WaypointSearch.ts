@@ -10,8 +10,7 @@ async function getWaypointByTime(whattime: number): Promise<Waypoint | Error> {
     single: true,
   });
 
-  return query.run()
-  .then((payload) => {
+  return query.run().then((payload) => {
     if (payload instanceof Error) {
       return payload;
     }
@@ -44,10 +43,12 @@ export async function WaypointSearch(request: RNFRequest): Promise<Response> {
 
   // If this hasn't been geocoded yet, do it.
   if (waypoint.geocode_attempts == 0) {
-    await waypoint.geocode().then((result) => { waypoint.save(); });
+    await waypoint.geocode().then((result) => {
+      waypoint.save();
+    });
   }
 
-  const output = (request.auth === 'ADMIN') ? waypoint : locationFilter(waypoint);
+  const output = request.auth === 'ADMIN' ? waypoint : locationFilter(waypoint);
 
   return new Response(JSON.stringify(output), {
     status: 200,
