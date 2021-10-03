@@ -1,4 +1,4 @@
-import { Query } from "./Query";
+import { Query } from './Query';
 
 export interface TripProps {
   id?: number | null;
@@ -37,21 +37,23 @@ export class Trip {
     const haveStart = Number.isInteger(this.start);
     const haveEnd = Number.isInteger(this.end);
 
-    return (haveSlug && haveStart && haveEnd);
+    return haveSlug && haveStart && haveEnd;
   }
 
   async save(): Promise<true | Error> {
     if (!this.validate()) {
-      return Error('400: Incomplete trip details.')
+      return Error('400: Incomplete trip details.');
     }
 
-    const payload = [{
-      id: this.id || undefined,
-      label: this.label || '',
-      slug: this.slug,
-      start: this.start,
-      end: this.end,
-    }];
+    const payload = [
+      {
+        id: this.id || undefined,
+        label: this.label || '',
+        slug: this.slug,
+        start: this.start,
+        end: this.end,
+      },
+    ];
 
     const query = new Query({
       endpoint: '/trip_data',
@@ -61,18 +63,17 @@ export class Trip {
       body: payload,
     });
 
-    return query.run()
-      .then((payload) => {
-        if (payload instanceof Error) {
-          return payload;
-        }
+    return query.run().then((payload) => {
+      if (payload instanceof Error) {
+        return payload;
+      }
 
-        try {
-          Object.assign(this, payload);
-          return true;
-        } catch {
-          return Error('500: Unable to process payload');
-        }
-      });
+      try {
+        Object.assign(this, payload);
+        return true;
+      } catch {
+        return Error('500: Unable to process payload');
+      }
+    });
   }
 }
