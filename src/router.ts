@@ -3,6 +3,7 @@ import { Router } from 'itty-router';
 import {
   TripIndex,
   TripDetails,
+  TripDelete,
   WaypointCreate,
   WaypointSearch,
   WaypointLatest,
@@ -28,6 +29,7 @@ router.get('/waypoint/:whattime', WaypointSearch);
 router.get('/trips', TripIndex);
 router.post('/trip', requireAdmin, TripCreate);
 router.get('/trip/:id', TripDetails);
+router.delete('/trip/:id', requireAdmin, TripDelete);
 
 router.get('/geocode-test', (request) => {
   return fillMissingGeocode(5);

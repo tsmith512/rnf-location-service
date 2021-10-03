@@ -4,6 +4,7 @@ export interface QueryProps {
   range?: string | number | undefined;
   single?: boolean;
   upsert?: boolean;
+  delete?: boolean;
   body?: object;
 }
 
@@ -17,7 +18,12 @@ export class Query {
   constructor(props: QueryProps) {
     this.reqHeaders = new Headers();
     this.endpoint = DB_ENDPOINT + props.endpoint;
-    this.method = props.body ? 'POST' : 'GET';
+
+    if (props.delete === true) {
+      this.method = 'DELETE';
+    } else {
+      this.method = props.body ? 'POST' : 'GET';
+    }
 
     // @TODO: Uhhhh this feels a little informal.
     if (props.admin) {
@@ -75,6 +81,8 @@ export class Query {
             );
           case 502:
             throw new Error('502: Bad Gateway, probably to PostgREST');
+          case 204:
+            return '';
           default:
             return response.text();
         }
@@ -82,7 +90,11 @@ export class Query {
       .then((text) => {
         // Rather than response.json() directly, hook in here with .text()
         // for debugging. Cloudflare Firewall errors come back as text.
-        return JSON.parse(text);
+        if (text.length) {
+          return JSON.parse(text);
+        } else {
+          return { success: true };
+        }
       })
       .catch((error) => {
         if (error instanceof SyntaxError) {
