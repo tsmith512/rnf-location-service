@@ -7,6 +7,7 @@ export async function TripDelete(request: RNFRequest): Promise<Response> {
   const query = new Query({
     endpoint: `/trip_data?id=eq.${id}`,
     delete: true,
+    admin: true,
   });
 
   const result = await query.run().then((payload) => {
