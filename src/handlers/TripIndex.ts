@@ -5,19 +5,18 @@ import { Query } from '../lib/Query';
 async function getAllTrips(range: string | undefined): Promise<Trip[] | Error> {
   const query = new Query({
     endpoint: '/trips?select=id,label,slug,start,end',
-    range: (range) ? range : undefined,
+    range: range ? range : undefined,
   });
 
-  return query.run()
-    .then((payload) => {
-      if (payload instanceof Error) {
-        return payload;
-      } else if (payload instanceof Array) {
-        return payload.map(t => new Trip(t));
-      }
+  return query.run().then((payload) => {
+    if (payload instanceof Error) {
+      return payload;
+    } else if (payload instanceof Array) {
+      return payload.map((t) => new Trip(t));
+    }
 
-      return Error('500: Unable to process payload');
-    });
+    return Error('500: Unable to process payload');
+  });
 }
 
 export async function TripIndex(request: RNFRequest): Promise<Response> {

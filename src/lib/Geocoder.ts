@@ -46,7 +46,7 @@ export class Geocoder {
     const addressPieces = this.readRevGeo(results);
 
     if (addressPieces instanceof Error) {
-      return Error('500: readRevGeo failed to parse the geocoded response')
+      return Error('500: readRevGeo failed to parse the geocoded response');
     }
 
     // Let's make a better "City, ST, C" or "State, C" kinda name
@@ -58,7 +58,9 @@ export class Geocoder {
   }
 
   async fetchReverseGeo(): Promise<Object | Error> {
-    return fetch(`${GMAPS_API_ENDPOINT}?latlng=${this.lat},${this.lon}&key=${GMAPS_API_KEY}`)
+    return fetch(
+      `${GMAPS_API_ENDPOINT}?latlng=${this.lat},${this.lon}&key=${GMAPS_API_KEY}`
+    )
       .then((response) => {
         return response.json();
       })
@@ -70,7 +72,7 @@ export class Geocoder {
           return Error('500: JSON Parse Error');
         }
 
-        return Error('500: Unknown error in Reverse Geocode Request')
+        return Error('500: Unknown error in Reverse Geocode Request');
       });
   }
 
@@ -124,9 +126,9 @@ export class Geocoder {
     // administrative_area_level_1 -- usually a State or Province
     if (pieces.administrative_area_level_1) {
       if (pieces.administrative_area_level_2 || pieces.locality) {
-        output.push(pieces.administrative_area_level_1.short)
+        output.push(pieces.administrative_area_level_1.short);
       } else {
-        output.push(pieces.administrative_area_level_1.long)
+        output.push(pieces.administrative_area_level_1.long);
       }
     }
 

@@ -1,5 +1,5 @@
-import { Geocoder, GeocoderResponse } from "./Geocoder";
-import { Query } from "./Query";
+import { Geocoder, GeocoderResponse } from './Geocoder';
+import { Query } from './Query';
 
 export interface WaypointProps {
   timestamp: number;
@@ -33,7 +33,7 @@ export class Waypoint {
 
   async geocode() {
     this.geocode_attempts++;
-    const geocoder = new Geocoder({lon: this.lon, lat: this.lat});
+    const geocoder = new Geocoder({ lon: this.lon, lat: this.lat });
     const results = await geocoder.update();
 
     if (results instanceof Error) {
@@ -48,15 +48,17 @@ export class Waypoint {
   }
 
   async save() {
-    const payload = [{
-      timestamp: this.timestamp,
-      point: `POINT(${this.lon} ${this.lat})`,
-      label: this.label || null,
-      state: this.state || null,
-      country: this.country || null,
-      geocode_attempts: this.geocode_attempts || 0,
-      geocode_results: this.geocode_results || null,
-    }];
+    const payload = [
+      {
+        timestamp: this.timestamp,
+        point: `POINT(${this.lon} ${this.lat})`,
+        label: this.label || null,
+        state: this.state || null,
+        country: this.country || null,
+        geocode_attempts: this.geocode_attempts || 0,
+        geocode_results: this.geocode_results || null,
+      },
+    ];
 
     const query = new Query({
       endpoint: '/waypoint_data',
@@ -66,19 +68,18 @@ export class Waypoint {
       body: payload,
     });
 
-    return query.run()
-      .then((payload) => {
-        if (payload instanceof Error) {
-          return payload;
-        }
+    return query.run().then((payload) => {
+      if (payload instanceof Error) {
+        return payload;
+      }
 
-        try {
-          Object.assign(this, payload);
-          return true;
-        } catch {
-          return Error('500: Unable to process payload');
-        }
-      });
+      try {
+        Object.assign(this, payload);
+        return true;
+      } catch {
+        return Error('500: Unable to process payload');
+      }
+    });
   }
 }
 
@@ -108,16 +109,15 @@ export async function waypointBulkSave(waypoints: Waypoint[]): Promise<number | 
     body: payload,
   });
 
-  return query.run()
-    .then((payload) => {
-      if (payload instanceof Error) {
-        return payload;
-      } else if (payload instanceof Array) {
-        return payload.length;
-      }
+  return query.run().then((payload) => {
+    if (payload instanceof Error) {
+      return payload;
+    } else if (payload instanceof Array) {
+      return payload.length;
+    }
 
-      // @TODO: We might have a valid JSON payload from the server which
-      // includes a database error or some weirdness.
-      return 0;
-    });
+    // @TODO: We might have a valid JSON payload from the server which
+    // includes a database error or some weirdness.
+    return 0;
+  });
 }
