@@ -1,5 +1,5 @@
 import { Trip } from '../lib/Trip';
-import { RNFRequest, standardHeaders } from '../lib/global';
+import { cacheHeaders, RNFRequest, standardHeaders } from '../lib/global';
 import { Query } from '../lib/Query';
 
 async function getAllTrips(range: string | undefined): Promise<Trip[] | Error> {
@@ -38,12 +38,12 @@ export async function TripIndex(request: RNFRequest): Promise<Response> {
   if (!trips.length) {
     return new Response(JSON.stringify({ message: 'No trips available in this range' }), {
       status: 416,
-      headers: standardHeaders,
+      headers: cacheHeaders(12, request),
     });
   }
 
   return new Response(JSON.stringify(trips), {
     status: 200,
-    headers: standardHeaders,
+    headers: cacheHeaders(12, request),
   });
 }

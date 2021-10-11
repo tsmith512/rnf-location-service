@@ -1,4 +1,5 @@
 import { Geocoder, GeocoderResponse } from './Geocoder';
+import { now } from './global';
 import { Query } from './Query';
 
 export interface WaypointProps {
@@ -29,6 +30,17 @@ export class Waypoint {
     if (!props.geocode_attempts) {
       this.geocode_attempts = 0;
     }
+  }
+
+  /**
+   * Is this waypoint in the past? How long ago did it end? Mostly for pairity
+   * with the Trip class so they both have the same model for use in cacing.
+   *
+   * @returns (bool|number) False if going, otherwise hours since this.end.
+   */
+   isPast(): boolean | number {
+    const ago = now() - this.timestamp;
+    return (ago < 0) ? false : (ago / 3600);
   }
 
   async geocode() {

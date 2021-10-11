@@ -1,3 +1,4 @@
+import { now } from './global';
 import { Query } from './Query';
 
 export interface TripProps {
@@ -38,6 +39,15 @@ export class Trip {
     const haveEnd = Number.isInteger(this.end);
 
     return haveSlug && haveStart && haveEnd;
+  }
+
+  /**
+   * Is this trip over? How long ago did it end?
+   * @returns (bool|number) False if going, otherwise hours since this.end.
+   */
+  isPast(): boolean | number {
+    const sinceEnd = now() - this.end;
+    return (sinceEnd < 0) ? false : (sinceEnd / 3600);
   }
 
   async save(): Promise<true | Error> {
