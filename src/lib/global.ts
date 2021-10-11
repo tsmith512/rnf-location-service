@@ -1,5 +1,5 @@
-import { Trip } from "./Trip";
-import { Waypoint } from "./Waypoint";
+import { Trip } from './Trip';
+import { Waypoint } from './Waypoint';
 
 /**
  * So between the Request that CF passes to the Worker and what itty-router
@@ -32,7 +32,7 @@ export const cacheHeaders = (hours: number, request?: RNFRequest) => {
     return {
       'cache-control': `public, max-age=${hours * 60 * 60}`,
       'x-rnf-cache-debug': `Fetched at ${now()} and cacheable for ${hours} hours.`,
-      ...standardHeaders
+      ...standardHeaders,
     };
   }
 
@@ -79,4 +79,4 @@ export const cacheControlByObject = (object: Trip | Waypoint): number => {
   // By now: we're looking at Waypoints that are older and are geocoded. Keep
   // them longer.
   return 24 * 7;
-}
+};

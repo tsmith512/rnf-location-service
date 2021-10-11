@@ -38,9 +38,9 @@ export class Waypoint {
    *
    * @returns (bool|number) False if going, otherwise hours since this.end.
    */
-   isPast(): boolean | number {
+  isPast(): boolean | number {
     const ago = now() - this.timestamp;
-    return (ago < 0) ? false : (ago / 3600);
+    return ago < 0 ? false : ago / 3600;
   }
 
   async geocode() {

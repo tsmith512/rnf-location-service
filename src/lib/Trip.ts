@@ -47,7 +47,7 @@ export class Trip {
    */
   isPast(): boolean | number {
     const sinceEnd = now() - this.end;
-    return (sinceEnd < 0) ? false : (sinceEnd / 3600);
+    return sinceEnd < 0 ? false : sinceEnd / 3600;
   }
 
   async save(): Promise<true | Error> {

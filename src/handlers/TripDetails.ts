@@ -1,5 +1,11 @@
 import { Trip, TripProps } from '../lib/Trip';
-import { cacheControlByObject, cacheHeaders, now, RNFRequest, standardHeaders } from '../lib/global';
+import {
+  cacheControlByObject,
+  cacheHeaders,
+  now,
+  RNFRequest,
+  standardHeaders,
+} from '../lib/global';
 import { locationFilter } from '../lib/Filter';
 import { Query } from '../lib/Query';
 
