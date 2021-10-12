@@ -1,5 +1,5 @@
 import { Waypoint, WaypointProps } from '../lib/Waypoint';
-import { RNFRequest, standardHeaders } from '../lib/global';
+import { cacheHeaders, RNFRequest, standardHeaders } from '../lib/global';
 import { locationFilter } from '../lib/Filter';
 import { Query } from '../lib/Query';
 
@@ -45,6 +45,6 @@ export async function WaypointLatest(request: RNFRequest): Promise<Response> {
 
   return new Response(JSON.stringify(output), {
     status: 200,
-    headers: standardHeaders,
+    headers: cacheHeaders(0.25, request),
   });
 }

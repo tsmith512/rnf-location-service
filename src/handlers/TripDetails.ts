@@ -1,5 +1,11 @@
 import { Trip, TripProps } from '../lib/Trip';
-import { RNFRequest, standardHeaders } from '../lib/global';
+import {
+  cacheControlByObject,
+  cacheHeaders,
+  now,
+  RNFRequest,
+  standardHeaders,
+} from '../lib/global';
 import { locationFilter } from '../lib/Filter';
 import { Query } from '../lib/Query';
 
@@ -34,15 +40,17 @@ export async function TripDetails(request: RNFRequest): Promise<Response> {
     });
   }
 
+  const cacheHours = cacheControlByObject(trip);
+
   if (request.auth === 'ADMIN') {
     return new Response(JSON.stringify(trip), {
       status: 200,
-      headers: standardHeaders,
+      headers: cacheHeaders(cacheHours, request),
     });
   } else {
     return new Response(JSON.stringify(trip.line ? locationFilter(trip) : trip), {
       status: 200,
-      headers: standardHeaders,
+      headers: cacheHeaders(cacheHours, request),
     });
   }
 }
