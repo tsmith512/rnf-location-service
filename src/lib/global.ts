@@ -36,6 +36,15 @@ export const cacheHeaders = (hours: number, request?: RNFRequest) => {
     };
   }
 
+  // And if it is an admin request, explicitly no-store it and write me a note
+  else {
+    return {
+      'cache-control': 'no-store, max-age=0',
+      'x-rnf-cache-debug': 'Authenticated request',
+    }
+  }
+
+  // This request didn't pass an authCheck (which would be odd...)
   return standardHeaders;
 };
 

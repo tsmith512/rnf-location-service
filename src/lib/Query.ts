@@ -91,6 +91,9 @@ export class Query {
         // Rather than response.json() directly, hook in here with .text()
         // for debugging. Cloudflare Firewall errors come back as text.
         if (text.length) {
+          if (text === 'error code: 1020') {
+            return Error('403: Firewall rules violation at Edge');
+          }
           return JSON.parse(text);
         } else {
           return { success: true };
