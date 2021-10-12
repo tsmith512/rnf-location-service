@@ -252,9 +252,10 @@ _TBD_
 + timestamp: `1484697627` (number) - Unix timestamp
 + lon: `-97.740` (number) - Longitude
 + lat: `30.275` (number) - Latitude
-+ city: `Austin` (string) - Geocoded city, if any
-+ admin: `Austin, TX, US` (string) - Most specific available place name
-+ trips (array[Trip]) - Array of trips containing this Waypoint
++ label: `Austin, TX` (string) - Geocoded city, or greatest specificity available, if any
++ state: `Texas` (string) - State/province, if any
++ country: `United States` (string) - Country, if geocoded
++ trips (array[number]) - Array of trip IDs containing this Waypoint
 
 ## Trip (object)
 
