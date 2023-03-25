@@ -1,5 +1,11 @@
 import { Waypoint, WaypointProps } from '../lib/Waypoint';
-import { RNFRequest, standardHeaders } from '../lib/global';
+import {
+  cacheControlByObject,
+  cacheHeaders,
+  now,
+  RNFRequest,
+  standardHeaders,
+} from '../lib/global';
 import { locationFilter } from '../lib/Filter';
 import { Query } from '../lib/Query';
 
@@ -48,10 +54,12 @@ export async function WaypointSearch(request: RNFRequest): Promise<Response> {
     });
   }
 
+  const cacheHours = cacheControlByObject(waypoint);
+
   const output = request.auth === 'ADMIN' ? waypoint : locationFilter(waypoint);
 
   return new Response(JSON.stringify(output), {
     status: 200,
-    headers: standardHeaders,
+    headers: cacheHeaders(cacheHours, request),
   });
 }

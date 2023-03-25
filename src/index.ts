@@ -12,6 +12,11 @@ declare global {
 
 import { routeRequest } from './router';
 
+const handleRequest = async (event: any) =>  {
+  const response = routeRequest(event.request);
+  return response;
+};
+
 addEventListener('fetch', (event) => {
-  event.respondWith(routeRequest(event.request));
+  event.respondWith(handleRequest(event));
 });
