@@ -1,17 +1,24 @@
 name = "rnf-location-service"
-type = "javascript"
-zone_id = "cb2e7aac346593483a4e3a8543cb6855"
-account_id = ""
-workers_dev = true
+main = "./src/index.ts"
+
+workers_dev = false
 compatibility_date = "2021-09-18"
 
-[build]
-command = "npm install && npm run build"
-[build.upload]
-format = "service-worker"
+route = "api.routenotfound.com/*"
 
 [vars]
 GMAPS_API_ENDPOINT = "https://maps.googleapis.com/maps/api/geocode/json"
 
-[env.production]
-route = "api.routenotfound.com/*"
+
+[env.dev]
+route = { pattern = "api.dev.routenotfound.com", custom_domain = true }
+
+[env.dev.vars]
+GMAPS_API_ENDPOINT = "https://maps.googleapis.com/maps/api/geocode/json"
+
+# Define secrets in each env:
+# API_ADMIN_PASS <-- These two are what the admin app should use
+# API_ADMIN_USER <-- ^
+# DB_ENDPOINT  <-- PostgREST endpoint URL
+# DB_ADMIN_JWT <-- This is how this script connects to PostgREST
+# GMAPS_API_KEY
