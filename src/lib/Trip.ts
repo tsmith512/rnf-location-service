@@ -16,7 +16,7 @@ export class Trip {
   slug: string;
   start: number;
   end: number;
-  line: any;
+  line: GeoJSON.GeoJSON;
 
   constructor(props: TripProps) {
     Object.assign(this, props);

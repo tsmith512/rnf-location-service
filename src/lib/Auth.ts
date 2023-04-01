@@ -73,7 +73,7 @@ const isAdmin = (user: credentials): boolean =>
  *
  * @param request
  */
-export function authCheck(request: RNFRequest) {
+export function authCheck(request: RNFRequest): void {
   const authHeader = request.headers.get('Authorization');
 
   if (authHeader) {
@@ -91,7 +91,7 @@ export function authCheck(request: RNFRequest) {
  * @param request (RNFRequest) which should now have an auth property
  * @returns
  */
-export function requireAdmin(request: RNFRequest) {
+export function requireAdmin(request: RNFRequest): void | Response {
   if (request.auth !== 'ADMIN') {
     return new Response('Unauthorized', {
       status: 401,

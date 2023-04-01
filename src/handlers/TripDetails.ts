@@ -2,7 +2,6 @@ import { Trip, TripProps } from '../lib/Trip';
 import {
   cacheControlByObject,
   cacheHeaders,
-  now,
   RNFRequest,
   standardHeaders,
 } from '../lib/global';

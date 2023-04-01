@@ -2,7 +2,6 @@ import { Waypoint, WaypointProps } from '../lib/Waypoint';
 import {
   cacheControlByObject,
   cacheHeaders,
-  now,
   RNFRequest,
   standardHeaders,
 } from '../lib/global';
@@ -49,7 +48,7 @@ export async function WaypointSearch(request: RNFRequest): Promise<Response> {
 
   // If this hasn't been geocoded yet, do it.
   if (waypoint.geocode_attempts == 0) {
-    await waypoint.geocode().then((result) => {
+    await waypoint.geocode().then(() => {
       waypoint.save();
     });
   }

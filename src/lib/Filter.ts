@@ -51,7 +51,7 @@ const filterCoords = (input: Array<number>): Array<number> => {
   return input;
 };
 
-export function locationFilter(input: Waypoint | Trip) {
+export function locationFilter(input: Waypoint | Trip): Waypoint | Trip {
   if (input instanceof Waypoint) {
     const newCoords = filterCoords([input.lon, input.lat]);
     input.lon = newCoords[0];

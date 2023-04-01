@@ -13,7 +13,7 @@ export async function WaypointCreate(request: RNFRequest): Promise<Response> {
   const waypoints: Waypoint[] = [];
 
   lines.forEach((line) => {
-    const [date, timestamp, lat, lon] = line.split(',');
+    const [ , timestamp, lat, lon] = line.split(',');
 
     // Confirm we have all the pieces, Tasker's queue ends with an empty line.
     // Or maybe a line is goofy.

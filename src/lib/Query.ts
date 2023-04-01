@@ -5,7 +5,7 @@ export interface QueryProps {
   single?: boolean;
   upsert?: boolean;
   delete?: boolean;
-  body?: object;
+  body?: any;
 }
 
 export class Query {

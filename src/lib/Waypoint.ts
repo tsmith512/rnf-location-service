@@ -43,7 +43,7 @@ export class Waypoint {
     return ago < 0 ? false : ago / 3600;
   }
 
-  async geocode() {
+  async geocode(): Promise<boolean> {
     this.geocode_attempts++;
     const geocoder = new Geocoder({ lon: this.lon, lat: this.lat });
     const results = await geocoder.update();
@@ -59,7 +59,7 @@ export class Waypoint {
     }
   }
 
-  async save() {
+  async save(): Promise<true | Error> {
     const payload = [
       {
         timestamp: this.timestamp,
