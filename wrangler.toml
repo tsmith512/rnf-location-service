@@ -4,7 +4,7 @@ main = "./src/index.ts"
 workers_dev = false
 compatibility_date = "2021-09-18"
 
-route = "api.routenotfound.com/*"
+route = { pattern = "api.routenotfound.com", custom_domain = true }
 
 [vars]
 GMAPS_API_ENDPOINT = "https://maps.googleapis.com/maps/api/geocode/json"
