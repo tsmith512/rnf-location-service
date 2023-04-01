@@ -20,3 +20,6 @@ const handleRequest = async (event: any) => {
 addEventListener('fetch', (event) => {
   event.respondWith(handleRequest(event));
 });
+
+// @TODO: Rewrite as module worker, but the gotcha is that global env vars and
+// secrets become bindings (props on env object passed as second obj to fetch())
