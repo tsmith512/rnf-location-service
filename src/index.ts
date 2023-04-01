@@ -1,3 +1,14 @@
+
+/**
+ *               _                  _      __                  _
+ *  _ _ ___ _  _| |_ ___   _ _  ___| |_   / _|___ _  _ _ _  __| |
+ * | '_/ _ \ || |  _/ -_) | ' \/ _ \  _| |  _/ _ \ || | ' \/ _` |
+ * |_| \___/\_,_|\__\___| |_||_\___/\__| |_| \___/\_,_|_||_\__,_|
+ *
+ * Worker to accept API requests related to maps and geocoding from the location
+ * tracker phone, trip management backend, or WordPress (server- or client-side)
+ */
+
 declare global {
   // In secrets
   const DB_ENDPOINT: string;
