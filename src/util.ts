@@ -1,6 +1,6 @@
-import { getAllWaypoints } from "./handlers/WaypointIndex";
-import { standardHeaders } from "./lib/global";
-import { waypointBulkSave } from "./lib/Waypoint";
+import { getAllWaypoints } from './handlers/WaypointIndex';
+import { standardHeaders } from './lib/global';
+import { waypointBulkSave } from './lib/Waypoint';
 
 export async function fillMissingGeocode(count: number): Promise<Response> {
   const waypoints = await getAllWaypoints({
@@ -23,9 +23,11 @@ export async function fillMissingGeocode(count: number): Promise<Response> {
     });
   }
 
-  await Promise.all(waypoints.map(async (p) => {
-    await p.geocode();
-  }));
+  await Promise.all(
+    waypoints.map(async (p) => {
+      await p.geocode();
+    })
+  );
 
   const saves = await waypointBulkSave(waypoints);
 
@@ -36,9 +38,9 @@ export async function fillMissingGeocode(count: number): Promise<Response> {
     });
   }
 
-  const status = (saves === waypoints.length) ? 201 : 200;
+  const status = saves === waypoints.length ? 201 : 200;
 
-  return new Response(JSON.stringify({ message: `${saves} waypoints updated`}), {
+  return new Response(JSON.stringify({ message: `${saves} waypoints updated` }), {
     status: status,
     headers: standardHeaders,
   });

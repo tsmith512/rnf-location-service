@@ -12,7 +12,7 @@ declare global {
 
 import { routeRequest } from './router';
 
-const handleRequest = async (event: any) =>  {
+const handleRequest = async (event: any) => {
   const response = routeRequest(event.request);
   return response;
 };

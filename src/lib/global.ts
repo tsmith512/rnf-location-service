@@ -42,7 +42,7 @@ export const cacheHeaders = (hours: number, request?: RNFRequest): Object => {
       'cache-control': 'no-store, max-age=0',
       'x-rnf-cache-debug': 'Authenticated request',
       ...standardHeaders,
-    }
+    };
   }
 };
 
