@@ -26,7 +26,7 @@ export const standardHeaders = {
   ...corsHeaders,
 };
 
-export const cacheHeaders = (hours: number, request?: RNFRequest) => {
+export const cacheHeaders = (hours: number, request?: RNFRequest): Object => {
   // Only if we know this isn't an admin request, save it.
   if (request?.auth !== 'ADMIN') {
     return {
@@ -42,11 +42,8 @@ export const cacheHeaders = (hours: number, request?: RNFRequest) => {
       'cache-control': 'no-store, max-age=0',
       'x-rnf-cache-debug': 'Authenticated request',
       ...standardHeaders,
-    }
+    };
   }
-
-  // This request didn't pass an authCheck (which would be odd...)
-  return standardHeaders;
 };
 
 /**

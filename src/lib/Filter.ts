@@ -19,12 +19,12 @@ const secretPlaces: secretPlaceProps[] = [
     fix: [-95.991516, 36.156859],
   },
   {
-    nw: [-98.409830, 30.623577],
+    nw: [-98.40983, 30.623577],
     se: [-98.353204, 30.559404],
     fix: [-98.378759, 30.571411],
   },
   {
-    nw: [-81.760876, 38.385700],
+    nw: [-81.760876, 38.3857],
     se: [-81.659895, 38.331979],
     fix: [-81.696758, 38.368905],
   },
@@ -51,7 +51,7 @@ const filterCoords = (input: Array<number>): Array<number> => {
   return input;
 };
 
-export function locationFilter(input: Waypoint | Trip) {
+export function locationFilter(input: Waypoint | Trip): Waypoint | Trip {
   if (input instanceof Waypoint) {
     const newCoords = filterCoords([input.lon, input.lat]);
     input.lon = newCoords[0];

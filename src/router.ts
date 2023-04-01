@@ -31,30 +31,42 @@ router.post('/trip', requireAdmin, TripCreate);
 router.get('/trip/:id', TripDetails);
 router.delete('/trip/:id', requireAdmin, TripDelete);
 
-router.get('/geocode-test', (request) => {
+router.get('/geocode-test', () => {
   return fillMissingGeocode(5);
 });
 
 // Options / Preflight
-router.options('*', (request) => new Response(null, {
-  headers: corsHeaders,
-}));
+router.options(
+  '*',
+  () =>
+    new Response(null, {
+      headers: corsHeaders,
+    })
+);
 
 // Catch-all 404
-router.get('*', (request) => new Response('Route Not Found', {
-  status: 404,
-  headers: {
-    'Content-Type': 'text/plain',
-    ...corsHeaders,
-  },
-}));
+router.get(
+  '*',
+  () =>
+    new Response('Route Not Found', {
+      status: 404,
+      headers: {
+        'Content-Type': 'text/plain',
+        ...corsHeaders,
+      },
+    })
+);
 
-router.post('*', (request) => new Response('Method Not Allowed', {
-  status: 405,
-  headers: {
-    'Content-Type': 'text/plain',
-    ...corsHeaders,
-  },
-}));
+router.post(
+  '*',
+  () =>
+    new Response('Method Not Allowed', {
+      status: 405,
+      headers: {
+        'Content-Type': 'text/plain',
+        ...corsHeaders,
+      },
+    })
+);
 
-export const routeRequest = (request: Request) => router.handle(request);
+export const routeRequest = (request: Request): Response => router.handle(request);

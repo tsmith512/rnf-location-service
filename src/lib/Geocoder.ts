@@ -57,7 +57,7 @@ export class Geocoder {
     return addressPieces;
   }
 
-  async fetchReverseGeo(): Promise<Object | Error> {
+  async fetchReverseGeo(): Promise<Record<string, unknown> | Error> {
     return fetch(
       `${GMAPS_API_ENDPOINT}?latlng=${this.lat},${this.lon}&key=${GMAPS_API_KEY}`
     )
