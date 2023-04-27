@@ -23,8 +23,26 @@ declare global {
 
 import { routeRequest } from './router';
 
+const cache = caches.default;
+
 const handleRequest = async (event: any) => {
-  const response = routeRequest(event.request);
+  // Check edge cache to see if we have an answer for this, if so return it
+  const cachedResponse = await cache.match(event.request);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  // Generate the response
+  const response = await routeRequest(event.request);
+
+  // If this response is publicly cacheable, store it in edge
+  if (response.headers.has('cache-control')) {
+    const cacheHeader = response.headers.get('cache-control');
+    if (cacheHeader?.indexOf('public') === 0) {
+      cache.put(event.request, response.clone());
+    }
+  }
+
   return response;
 };
 
