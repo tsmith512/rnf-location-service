@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 10.18 (Ubuntu 10.18-0ubuntu0.18.04.1)
--- Dumped by pg_dump version 10.18 (Ubuntu 10.18-0ubuntu0.18.04.1)
+-- Dumped from database version 10.21 (Debian 10.21-1.pgdg90+1)
+-- Dumped by pg_dump version 10.21 (Debian 10.21-1.pgdg90+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -15,6 +15,34 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+
+--
+-- Name: tiger; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA tiger;
+
+
+--
+-- Name: tiger_data; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA tiger_data;
+
+
+--
+-- Name: topology; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA topology;
+
+
+--
+-- Name: SCHEMA topology; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON SCHEMA topology IS 'PostGIS Topology schema';
+
 
 --
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
@@ -31,6 +59,20 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
 --
+-- Name: fuzzystrmatch; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS fuzzystrmatch WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION fuzzystrmatch; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION fuzzystrmatch IS 'determine similarities and distance between strings';
+
+
+--
 -- Name: postgis; Type: EXTENSION; Schema: -; Owner: -
 --
 
@@ -42,6 +84,34 @@ CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
 --
 
 COMMENT ON EXTENSION postgis IS 'PostGIS geometry, geography, and raster spatial types and functions';
+
+
+--
+-- Name: postgis_tiger_geocoder; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS postgis_tiger_geocoder WITH SCHEMA tiger;
+
+
+--
+-- Name: EXTENSION postgis_tiger_geocoder; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION postgis_tiger_geocoder IS 'PostGIS tiger geocoder and reverse geocoder';
+
+
+--
+-- Name: postgis_topology; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS postgis_topology WITH SCHEMA topology;
+
+
+--
+-- Name: EXTENSION postgis_topology; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION postgis_topology IS 'PostGIS topology spatial types and functions';
 
 
 --
@@ -67,9 +137,10 @@ SELECT
 CREATE FUNCTION public.waypoint_by_time(whattime integer) RETURNS public.waypoints
     LANGUAGE sql
     AS $$
-  SELECT * FROM waypoints
-  ORDER BY (abs(timestamp - whattime)) ASC
-  LIMIT 1
+SELECT waypoints.* FROM waypoints
+LEFT OUTER JOIN trips ON trips.id = ANY(waypoints.trips)
+WHERE trips.start < whattime AND whattime < trips.end
+ORDER BY (abs(timestamp - whattime)) ASC LIMIT 1
 $$;
 
 
@@ -221,6 +292,10 @@ CREATE OR REPLACE VIEW public.trips AS
 -- Name: SCHEMA public; Type: ACL; Schema: -; Owner: -
 --
 
+REVOKE ALL ON SCHEMA public FROM pgrnf;
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
 GRANT USAGE ON SCHEMA public TO web_requests;
 GRANT USAGE ON SCHEMA public TO admin_requests;
 
@@ -266,7 +341,6 @@ GRANT ALL ON TABLE public.raster_overviews TO rnf;
 -- Name: TABLE spatial_ref_sys; Type: ACL; Schema: public; Owner: -
 --
 
-REVOKE ALL ON TABLE public.spatial_ref_sys FROM postgres;
 GRANT ALL ON TABLE public.spatial_ref_sys TO rnf;
 
 
@@ -292,6 +366,7 @@ GRANT ALL ON TABLE public.trips TO rnf;
 --
 
 GRANT SELECT,USAGE ON SEQUENCE public.trips_id_seq TO admin_requests;
+GRANT ALL ON SEQUENCE public.trips_id_seq TO rnf;
 
 
 --
