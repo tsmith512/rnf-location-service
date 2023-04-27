@@ -1,3 +1,5 @@
+import { WaypointProps } from "./Waypoint";
+
 export interface QueryProps {
   admin?: boolean;
   endpoint: string;
@@ -57,7 +59,7 @@ export class Query {
     }
   }
 
-  async run(): Promise<JSON | Error> {
+  async run(): Promise<WaypointProps | Error> {
     return fetch(this.endpoint, {
       headers: this.reqHeaders,
       method: this.method,
@@ -94,7 +96,7 @@ export class Query {
           if (text === 'error code: 1020') {
             return Error('403: Firewall rules violation at Edge');
           }
-          return JSON.parse(text);
+          return JSON.parse(text) as unknown as WaypointProps;
         } else {
           return { success: true };
         }

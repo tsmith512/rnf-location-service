@@ -1,4 +1,4 @@
-import { Waypoint, WaypointProps } from '../lib/Waypoint';
+import { Waypoint } from '../lib/Waypoint';
 import {
   cacheControlByObject,
   cacheHeaders,
@@ -21,7 +21,11 @@ async function getWaypointByTime(whattime: number): Promise<Waypoint | Error> {
     }
 
     try {
-      return new Waypoint(payload as unknown as WaypointProps);
+      if (payload?.timestamp !== null) {
+        return new Waypoint(payload);
+      } else {
+        return new Error('404: No matching waypoint');
+      }
     } catch {
       return Error('500: Unable to process payload');
     }
