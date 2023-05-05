@@ -9,6 +9,7 @@ import {
   WaypointLatest,
   TripCreate,
   WaypointIndex,
+  WaypointsPending,
 } from './handlers';
 import { authCheck, requireAdmin } from './lib/Auth';
 import { corsHeaders } from './lib/global';
@@ -21,6 +22,10 @@ router.all('*', authCheck);
 
 // Waypoint related
 router.get('/waypoints', requireAdmin, WaypointIndex);
+router.get('/waypoints/pending', requireAdmin, WaypointsPending);
+router.get('/waypoints/pending/process', requireAdmin, () => {
+  return fillMissingGeocode(10);
+});
 router.post('/waypoint', requireAdmin, WaypointCreate);
 router.get('/waypoint', WaypointLatest);
 router.get('/waypoint/:whattime', WaypointSearch);
@@ -30,10 +35,6 @@ router.get('/trips', TripIndex);
 router.post('/trip', requireAdmin, TripCreate);
 router.get('/trip/:id', TripDetails);
 router.delete('/trip/:id', requireAdmin, TripDelete);
-
-router.get('/geocode-test', () => {
-  return fillMissingGeocode(5);
-});
 
 // Options / Preflight
 router.options(
