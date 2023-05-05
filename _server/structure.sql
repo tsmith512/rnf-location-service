@@ -3,7 +3,7 @@
 --
 
 -- Dumped from database version 10.21 (Debian 10.21-1.pgdg90+1)
--- Dumped by pg_dump version 10.21 (Debian 10.21-1.pgdg90+1)
+-- Dumped by pg_dump version 14.7 (Ubuntu 14.7-0ubuntu0.22.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -42,20 +42,6 @@ CREATE SCHEMA topology;
 --
 
 COMMENT ON SCHEMA topology IS 'PostGIS Topology schema';
-
-
---
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-
---
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
 --
@@ -144,9 +130,16 @@ ORDER BY (abs(timestamp - whattime)) ASC LIMIT 1
 $$;
 
 
-SET default_tablespace = '';
+--
+-- Name: waypoints_pending_count(); Type: FUNCTION; Schema: public; Owner: -
+--
 
-SET default_with_oids = false;
+CREATE FUNCTION public.waypoints_pending_count() RETURNS integer
+    LANGUAGE plpgsql
+    AS $$ BEGIN RETURN (SELECT COUNT(*) AS c FROM waypoint_data WHERE geocode_attempts = 0); END; $$;
+
+
+SET default_tablespace = '';
 
 --
 -- Name: trip_data; Type: TABLE; Schema: public; Owner: -
