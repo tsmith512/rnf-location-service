@@ -9,9 +9,14 @@ route = { pattern = "api.routenotfound.com", custom_domain = true }
 [vars]
 GMAPS_API_ENDPOINT = "https://maps.googleapis.com/maps/api/geocode/json"
 
+[triggers]
+crons = ["0 * * * *"]
 
 [env.dev]
 route = { pattern = "api.dev.routenotfound.com", custom_domain = true }
+
+[env.dev.triggers]
+crons = ["0 * * * *"]
 
 [env.dev.vars]
 GMAPS_API_ENDPOINT = "https://maps.googleapis.com/maps/api/geocode/json"

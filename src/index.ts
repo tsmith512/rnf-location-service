@@ -22,6 +22,7 @@ declare global {
 }
 
 import { routeRequest } from './router';
+import { fillMissingGeocode } from './util';
 
 const cache = caches.default;
 
@@ -48,9 +49,19 @@ const handleRequest = async (event: any) => {
   return response;
 };
 
+const handleScheduled = async (event: any) => {
+  return await fillMissingGeocode(20).then((response) => {
+    return response.ok;
+  })
+};
+
 addEventListener('fetch', (event) => {
   event.respondWith(handleRequest(event));
 });
+
+addEventListener('scheduled', (event) => {
+  event.waitUntil(handleScheduled(event));
+})
 
 // @TODO: Rewrite as module worker, but the gotcha is that global env vars and
 // secrets become bindings (props on env object passed as second obj to fetch())
