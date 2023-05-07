@@ -25,7 +25,7 @@ export async function fillMissingGeocode(count: number): Promise<Response> {
 
   await Promise.all(
     waypoints.map(async (p) => {
-      await p.geocode();
+      return p.geocode();
     })
   );
 
