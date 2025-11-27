@@ -58,10 +58,12 @@ export function locationFilter(input: Waypoint | Trip): Waypoint | Trip {
     input.lat = newCoords[1];
     input.point = undefined;
   } else if (input instanceof Trip) {
-    const filteredLine = input.line.coordinates.map((coords: Array<number>) =>
-      filterCoords(coords)
-    );
-    input.line.coordinates = filteredLine;
+    if (input.line && 'coordinates' in input.line) {
+      const filteredLine = (input.line as any).coordinates.map((coords: Array<number>) =>
+        filterCoords(coords)
+      );
+      (input.line as any).coordinates = filteredLine;
+    }
   }
 
   return input;

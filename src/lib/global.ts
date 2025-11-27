@@ -26,7 +26,10 @@ export const standardHeaders = {
   ...corsHeaders,
 };
 
-export const cacheHeaders = (hours: number, request?: RNFRequest): Object => {
+export const cacheHeaders = (
+  hours: number,
+  request?: RNFRequest
+): Record<string, string> => {
   // Only if we know this isn't an admin request, save it.
   if (request?.auth !== 'ADMIN') {
     return {
@@ -63,23 +66,23 @@ export const cacheControlByObject = (object: Trip | Waypoint): number => {
   }
 
   // If it's recent, keep it for an hour just to reduce load
-  else if (past < 24) {
+  if (typeof past === 'number' && past < 24) {
     return 1;
   }
 
   // Recently finished trips, keep 'em somewhat fresh
-  else if (object instanceof Trip && past < 72) {
+  if (object instanceof Trip && typeof past === 'number' && past < 72) {
     return 12;
   }
 
   // Old trips are good forever
-  else if (object instanceof Trip) {
+  if (object instanceof Trip) {
     return 24 * 30;
   }
 
   // Recent waypoints, don't keep 'em long in case data hasn't been submitted
   // yet, or if geocoding isn't complete
-  else if (past < 72 || object.geocode_attempts < 1) {
+  if (typeof past === 'number' && (past < 72 || object.geocode_attempts < 1)) {
     return 2;
   }
 

@@ -1,4 +1,4 @@
-import { WaypointProps } from "./Waypoint";
+import { WaypointProps } from './Waypoint';
 
 export interface QueryProps {
   admin?: boolean;

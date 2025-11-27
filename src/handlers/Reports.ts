@@ -1,4 +1,4 @@
-import { now, RNFRequest, standardHeaders } from '../lib/global';
+import { RNFRequest, standardHeaders } from '../lib/global';
 import { Query } from '../lib/Query';
 
 export async function WaypointsPending(request: RNFRequest): Promise<Response> {
@@ -10,7 +10,7 @@ export async function WaypointsPending(request: RNFRequest): Promise<Response> {
   if (request instanceof Error) {
     return new Response(JSON.stringify(results), {
       status: 500,
-      headers: standardHeaders
+      headers: standardHeaders,
     });
   } else {
     return new Response(JSON.stringify(results), {
@@ -18,4 +18,4 @@ export async function WaypointsPending(request: RNFRequest): Promise<Response> {
       headers: standardHeaders,
     });
   }
-};
+}

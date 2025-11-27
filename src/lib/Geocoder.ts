@@ -65,7 +65,7 @@ export class Geocoder {
         return response.json();
       })
       .then((payload) => {
-        return payload;
+        return payload as Record<string, unknown>;
       })
       .catch((error) => {
         if (error instanceof SyntaxError) {
