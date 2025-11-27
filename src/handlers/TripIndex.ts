@@ -1,11 +1,13 @@
 import { Trip } from '../lib/Trip';
 import { cacheHeaders, RNFRequest, standardHeaders } from '../lib/global';
 import { Query } from '../lib/Query';
+import type { Env } from '../index';
 
-async function getAllTrips(range: string | undefined): Promise<Trip[] | Error> {
+async function getAllTrips(range: string | undefined, env: Env): Promise<Trip[] | Error> {
   const query = new Query({
     endpoint: '/trips?select=id,label,slug,start,end',
     range: range ? range : undefined,
+    env,
   });
 
   return query.run().then((payload) => {
@@ -19,13 +21,13 @@ async function getAllTrips(range: string | undefined): Promise<Trip[] | Error> {
   });
 }
 
-export async function TripIndex(request: RNFRequest): Promise<Response> {
+export async function TripIndex(request: RNFRequest, env: Env): Promise<Response> {
   const range = request.headers
     .get('Range')
     ?.match(/\d+-\d+/g)
     ?.pop();
 
-  const trips = await getAllTrips(range);
+  const trips = await getAllTrips(range, env);
 
   if (trips instanceof Error) {
     const [code, message] = trips.message?.split(': ');

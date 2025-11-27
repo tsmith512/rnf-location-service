@@ -8,59 +8,50 @@
  * tracker phone, trip management backend, or WordPress (server- or client-side)
  */
 
-declare global {
-  // In secrets
-  const DB_ENDPOINT: string;
-  const DB_ADMIN_JWT: string;
-  const GMAPS_API_KEY: string;
-  const API_ADMIN_USER: string;
-  const API_ADMIN_PASS: string;
-
-  // In wrangler.toml as plaintext
-  const GMAPS_API_ENDPOINT: string;
-}
-
 import { routeRequest } from './router';
 import { fillMissingGeocode } from './util';
 
-const cache = (caches as any).default;
+export interface Env {
+  // Secrets
+  DB_ENDPOINT: string;
+  DB_ADMIN_JWT: string;
+  GMAPS_API_KEY: string;
+  API_ADMIN_USER: string;
+  API_ADMIN_PASS: string;
+  // Variables from wrangler.toml
+  GMAPS_API_ENDPOINT: string;
+}
 
-const handleRequest = async (event: any) => {
-  // Check edge cache to see if we have an answer for this, if so return it
-  if (!event.request.headers.has('authorization')) {
-    const cachedResponse = await cache.match(event.request);
-    if (cachedResponse) {
-      return cachedResponse;
+export default {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    // Check edge cache to see if we have an answer for this, if so return it
+    const cache = caches.default;
+    if (!request.headers.has('authorization')) {
+      const cachedResponse = await cache.match(request);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
     }
-  }
 
-  // Generate the response
-  const response = await routeRequest(event.request);
+    // Generate the response
+    const response = await routeRequest(request, env);
 
-  // If this response is publicly cacheable, store it in edge
-  if (response.headers.has('cache-control')) {
-    const cacheHeader = response.headers.get('cache-control');
-    if (cacheHeader?.indexOf('public') === 0) {
-      cache.put(event.request, response.clone());
+    // If this response is publicly cacheable, store it in edge
+    if (response.headers.has('cache-control')) {
+      const cacheHeader = response.headers.get('cache-control');
+      if (cacheHeader?.indexOf('public') === 0) {
+        ctx.waitUntil(cache.put(request, response.clone()));
+      }
     }
-  }
 
-  return response;
+    return response;
+  },
+
+  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(
+      fillMissingGeocode(20, env).then((response) => {
+        console.log('Geocoding cron completed:', response.status);
+      })
+    );
+  },
 };
-
-const handleScheduled = async () => {
-  return await fillMissingGeocode(20).then((response) => {
-    return response.ok;
-  });
-};
-
-addEventListener('fetch', (event: any) => {
-  event.respondWith(handleRequest(event));
-});
-
-addEventListener('scheduled', (event: any) => {
-  event.waitUntil(handleScheduled());
-});
-
-// @TODO: Rewrite as module worker, but the gotcha is that global env vars and
-// secrets become bindings (props on env object passed as second obj to fetch())

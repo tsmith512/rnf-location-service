@@ -1,17 +1,18 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
-    "module": "commonjs",
+    "module": "esnext",
     "target": "esnext",
-    "lib": ["esnext", "webworker"],
+    "lib": ["esnext"],
     "alwaysStrict": true,
     "strict": true,
     "preserveConstEnums": true,
     "strictPropertyInitialization": false,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "sourceMap": true,
     "esModuleInterop": true,
-    "types": ["@cloudflare/workers-types", "@types/service-worker-mock", "@types/geojson"]
+    "skipLibCheck": true,
+    "types": ["@cloudflare/workers-types", "@types/geojson"]
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "test"]

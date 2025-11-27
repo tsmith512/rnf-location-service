@@ -1,7 +1,8 @@
 import { Waypoint, waypointBulkSave } from '../lib/Waypoint';
 import { RNFRequest, standardHeaders } from '../lib/global';
+import type { Env } from '../index';
 
-export async function WaypointCreate(request: RNFRequest): Promise<Response> {
+export async function WaypointCreate(request: RNFRequest, env: Env): Promise<Response> {
   // Tasker [still...] records the data in a text file like this:
   //   1-12-17,1484250000,30.123,-95.123
   //   1-12-18,1484260000,30.456,-95.456
@@ -33,14 +34,14 @@ export async function WaypointCreate(request: RNFRequest): Promise<Response> {
   if (waypoints.length < 5) {
     await Promise.all(
       waypoints.map(async (p) => {
-        await p.geocode();
+        await p.geocode(env);
       })
     );
   } else {
-    await waypoints[waypoints.length - 1].geocode();
+    await waypoints[waypoints.length - 1].geocode(env);
   }
 
-  const saves = await waypointBulkSave(waypoints);
+  const saves = await waypointBulkSave(waypoints, env);
 
   // @TODO: Make this happen in all handlers. This endpoint would send a 200 to
   // the client when it got a 403 trying to save stuff.

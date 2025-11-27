@@ -1,10 +1,12 @@
 import { Waypoint } from '../lib/Waypoint';
 import { RNFRequest, standardHeaders } from '../lib/global';
 import { Query } from '../lib/Query';
+import type { Env } from '../index';
 
 interface allWaypointsQueryProps {
   range?: string;
   missingGeo?: boolean;
+  env: Env;
 }
 
 export async function getAllWaypoints(
@@ -14,6 +16,7 @@ export async function getAllWaypoints(
     endpoint: '/waypoints_all',
     range: props.range,
     admin: true,
+    env: props.env,
   });
 
   if (props.missingGeo) {
@@ -31,13 +34,13 @@ export async function getAllWaypoints(
   });
 }
 
-export async function WaypointIndex(request: RNFRequest): Promise<Response> {
+export async function WaypointIndex(request: RNFRequest, env: Env): Promise<Response> {
   const range = request.headers
     .get('Range')
     ?.match(/\d+-\d+/g)
     ?.pop();
 
-  const waypoints = await getAllWaypoints({ range: range });
+  const waypoints = await getAllWaypoints({ range: range, env });
 
   if (waypoints instanceof Error) {
     const [code, message] = waypoints.message?.split(': ');

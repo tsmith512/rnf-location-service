@@ -1,5 +1,6 @@
 import { now } from './global';
 import { Query } from './Query';
+import type { Env } from '../index';
 
 export interface TripProps {
   id?: number | null;
@@ -50,7 +51,7 @@ export class Trip {
     return sinceEnd < 0 ? false : sinceEnd / 3600;
   }
 
-  async save(): Promise<true | Error> {
+  async save(env: Env): Promise<true | Error> {
     if (!this.validate()) {
       return Error('400: Incomplete trip details.');
     }
@@ -71,6 +72,7 @@ export class Trip {
       single: true,
       upsert: true,
       body: payload,
+      env,
     });
 
     return query.run().then((payload) => {

@@ -1,11 +1,13 @@
 import { getAllWaypoints } from './handlers/WaypointIndex';
 import { standardHeaders } from './lib/global';
 import { waypointBulkSave } from './lib/Waypoint';
+import type { Env } from './index';
 
-export async function fillMissingGeocode(count: number): Promise<Response> {
+export async function fillMissingGeocode(count: number, env: Env): Promise<Response> {
   const waypoints = await getAllWaypoints({
     range: `0-${count - 1}`,
     missingGeo: true,
+    env,
   });
 
   if (waypoints instanceof Error) {
@@ -25,11 +27,11 @@ export async function fillMissingGeocode(count: number): Promise<Response> {
 
   await Promise.all(
     waypoints.map(async (p) => {
-      return p.geocode();
+      return p.geocode(env);
     })
   );
 
-  const saves = await waypointBulkSave(waypoints);
+  const saves = await waypointBulkSave(waypoints, env);
 
   if (saves instanceof Error) {
     return new Response(JSON.stringify(saves), {

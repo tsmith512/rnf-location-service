@@ -3,6 +3,7 @@
 // it'll be fine.
 
 import { corsHeaders, RNFRequest } from './global';
+import type { Env } from '../index';
 
 // Adapted from dommmel/cloudflare-workers-basic-auth
 
@@ -62,25 +63,27 @@ const parseAuth = (input: string): credentials | false => {
  * public web request. May add different roles in the future.
  *
  * @param user (credentials) a credentials pair from the Authorization header
+ * @param env (Env) environment variables
  * @returns (bool) am I me?
  */
-const isAdmin = (user: credentials): boolean =>
-  user.username == API_ADMIN_USER && user.password == API_ADMIN_PASS;
+const isAdmin = (user: credentials, env: Env): boolean =>
+  user.username == env.API_ADMIN_USER && user.password == env.API_ADMIN_PASS;
 
 /**
  * Middleware to add an auth property to the RNFRequest that'll get passed to
  * other handler. No return value, per itty-router middelware spec.
  *
  * @param request
+ * @param env
  */
-export function authCheck(request: RNFRequest): void {
+export function authCheck(request: RNFRequest, env: Env): void {
   const authHeader = request.headers.get('Authorization');
 
   if (authHeader) {
     const credentials = parseAuth(authHeader);
 
     if (credentials) {
-      request.auth = isAdmin(credentials) ? 'ADMIN' : 'PUBLIC';
+      request.auth = isAdmin(credentials, env) ? 'ADMIN' : 'PUBLIC';
     }
   }
 }

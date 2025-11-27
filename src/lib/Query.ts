@@ -1,4 +1,5 @@
 import { WaypointProps } from './Waypoint';
+import type { Env } from '../index';
 
 export interface QueryProps {
   admin?: boolean;
@@ -8,6 +9,7 @@ export interface QueryProps {
   upsert?: boolean;
   delete?: boolean;
   body?: any;
+  env: Env;
 }
 
 export class Query {
@@ -19,7 +21,7 @@ export class Query {
 
   constructor(props: QueryProps) {
     this.reqHeaders = new Headers();
-    this.endpoint = DB_ENDPOINT + props.endpoint;
+    this.endpoint = props.env.DB_ENDPOINT + props.endpoint;
 
     if (props.delete === true) {
       this.method = 'DELETE';
@@ -29,7 +31,7 @@ export class Query {
 
     // @TODO: Uhhhh this feels a little informal.
     if (props.admin) {
-      this.reqHeaders.append('Authorization', `Bearer ${DB_ADMIN_JWT}`);
+      this.reqHeaders.append('Authorization', `Bearer ${props.env.DB_ADMIN_JWT}`);
     }
 
     if (props.body) {

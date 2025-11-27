@@ -1,7 +1,8 @@
 import { Trip, TripProps } from '../lib/Trip';
 import { RNFRequest, standardHeaders } from '../lib/global';
+import type { Env } from '../index';
 
-export async function TripCreate(request: RNFRequest): Promise<Response> {
+export async function TripCreate(request: RNFRequest, env: Env): Promise<Response> {
   const payload = await request.json().catch((e) => {
     return new Response(JSON.stringify({ message: e.message }), {
       status: 400,
@@ -18,7 +19,7 @@ export async function TripCreate(request: RNFRequest): Promise<Response> {
     });
   }
 
-  const save = await trip.save();
+  const save = await trip.save(env);
 
   if (save instanceof Error) {
     return new Response(JSON.stringify({ message: save.message }), {

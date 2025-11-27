@@ -8,17 +8,21 @@ This is a Cloudflare Worker that provides a location tracking API for Route Not 
 
 ## Commands
 
-### Build and Development
-- `npm run build` - Build the worker using webpack
+### Development
+- `npm run dev` - Start local development server with Wrangler
 - `npm run lint` - Run ESLint and Prettier checks (fails with any warnings)
 - `npm run format` - Format code with Prettier
 - `npm test` - Run Jest tests (note: jestconfig.json may not exist yet)
 
 ### Deployment
-This project uses Wrangler (Cloudflare's CLI) for deployment. Configuration is in `wrangler.toml`:
+- `npm run deploy` - Deploy to production environment
+- `npm run deploy:dev` - Deploy to dev environment
+
+This project uses Wrangler 4 (Cloudflare's CLI) for deployment. Configuration is in `wrangler.toml`:
 - Production route: `api.routenotfound.com`
 - Dev route: `api.dev.routenotfound.com`
 - Hourly cron job (`0 * * * *`) to geocode pending waypoints
+- Wrangler handles TypeScript compilation automatically (no webpack needed)
 
 ## Architecture
 
@@ -104,18 +108,20 @@ Implemented in `src/lib/global.ts`:
 Variables in `wrangler.toml`:
 - `GMAPS_API_ENDPOINT` - Google Maps API base URL
 
-Required secrets (set per environment):
+Required secrets (set per environment with `wrangler secret put`):
 - `API_ADMIN_USER` / `API_ADMIN_PASS` - Admin authentication
 - `DB_ENDPOINT` - PostgREST endpoint URL
 - `DB_ADMIN_JWT` - JWT token for PostgREST admin operations
 - `GMAPS_API_KEY` - Google Maps API key
 
-Global variables are declared in `src/index.ts` using `declare global` block.
+Environment variables are passed via the `Env` interface defined in `src/index.ts` and threaded through all handlers and library functions.
 
 ## Important Notes
 
-- This is a **service worker** format (not module worker). Global env vars/secrets are accessed directly, not through an `env` binding object.
+- This is a **module worker** using modern ES modules export format with `export default { fetch, scheduled }`.
+- Environment variables/secrets are passed as the `env` parameter to the fetch and scheduled handlers, then threaded through all functions.
 - Location data filtering: Public requests get filtered location data; admin requests get full precision.
 - CSV format for waypoint creation: `date,timestamp,lat,lon` (one waypoint per line)
 - API documentation exists in `apiary.apib` (API Blueprint format)
 - Main branch is `trunk`, not `main` or `master`
+- Uses Wrangler 4 with built-in TypeScript support (no webpack/bundler configuration needed)

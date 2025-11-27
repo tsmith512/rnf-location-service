@@ -1,13 +1,15 @@
 import { RNFRequest, standardHeaders } from '../lib/global';
 import { Query } from '../lib/Query';
+import type { Env } from '../index';
 
-export async function TripDelete(request: RNFRequest): Promise<Response> {
+export async function TripDelete(request: RNFRequest, env: Env): Promise<Response> {
   const id = parseInt(request.params.id);
 
   const query = new Query({
     endpoint: `/trip_data?id=eq.${id}`,
     delete: true,
     admin: true,
+    env,
   });
 
   const result = await query.run().then((payload) => {
