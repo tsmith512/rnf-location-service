@@ -10,6 +10,13 @@ GMAPS_API_ENDPOINT = "https://maps.googleapis.com/maps/api/geocode/json"
 [triggers]
 crons = ["0 * * * *"]
 
+[observability]
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+invocation_logs = true
+persist = true
+
 [env.dev]
 route = { pattern = "api.dev.routenotfound.com", custom_domain = true }
 
