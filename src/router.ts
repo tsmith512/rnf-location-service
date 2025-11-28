@@ -10,6 +10,7 @@ import {
   TripCreate,
   WaypointIndex,
   WaypointsPending,
+  FiftyStates,
 } from './handlers';
 import { authCheck, requireAdmin } from './lib/Auth';
 import { corsHeaders } from './lib/global';
@@ -37,6 +38,9 @@ router.post('/trip', requireAdmin, TripCreate);
 // @TODO: Differentiate post-new and patch-edit. Right now post will overwrite.
 router.get('/trip/:id', TripDetails);
 router.delete('/trip/:id', requireAdmin, TripDelete);
+
+// Specials and Side Projects
+router.get('/fifty_states', FiftyStates);
 
 // Options / Preflight
 router.options(

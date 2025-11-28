@@ -6,4 +6,7 @@ export { WaypointCreate } from './WaypointCreate';
 export { WaypointLatest } from './WaypointLatest';
 export { WaypointSearch } from './WaypointSearch';
 export { WaypointIndex } from './WaypointIndex';
-export { WaypointsPending } from './Reports';
+export {
+  WaypointsPending,
+  FiftyStates,
+} from './Reports';
