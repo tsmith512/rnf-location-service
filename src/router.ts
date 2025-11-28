@@ -34,6 +34,7 @@ router.get('/waypoint/:whattime', WaypointSearch);
 // Trip related
 router.get('/trips', TripIndex);
 router.post('/trip', requireAdmin, TripCreate);
+  // @TODO: Differentiate post-new and patch-edit. Right now post will overwrite.
 router.get('/trip/:id', TripDetails);
 router.delete('/trip/:id', requireAdmin, TripDelete);
 
