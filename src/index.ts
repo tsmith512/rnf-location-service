@@ -47,7 +47,11 @@ export default {
     return response;
   },
 
-  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
+  async scheduled(
+    _event: ScheduledEvent,
+    env: Env,
+    ctx: ExecutionContext
+  ): Promise<void> {
     ctx.waitUntil(
       fillMissingGeocode(20, env).then((response) => {
         console.log('Geocoding cron completed:', response.status);

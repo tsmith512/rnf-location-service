@@ -24,7 +24,7 @@ router.all('*', (request: Request, env: Env) => authCheck(request, env));
 // Waypoint related
 router.get('/waypoints', requireAdmin, WaypointIndex);
 router.get('/waypoints/pending', requireAdmin, WaypointsPending);
-router.get('/waypoints/pending/process', requireAdmin, (request: Request, env: Env) => {
+router.get('/waypoints/pending/process', requireAdmin, (_request: Request, env: Env) => {
   return fillMissingGeocode(10, env);
 });
 router.post('/waypoint', requireAdmin, WaypointCreate);
@@ -34,7 +34,7 @@ router.get('/waypoint/:whattime', WaypointSearch);
 // Trip related
 router.get('/trips', TripIndex);
 router.post('/trip', requireAdmin, TripCreate);
-  // @TODO: Differentiate post-new and patch-edit. Right now post will overwrite.
+// @TODO: Differentiate post-new and patch-edit. Right now post will overwrite.
 router.get('/trip/:id', TripDetails);
 router.delete('/trip/:id', requireAdmin, TripDelete);
 
