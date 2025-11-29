@@ -23,6 +23,7 @@ This project uses Wrangler 4 (Cloudflare's CLI) for deployment. Configuration is
 - Dev route: `api.dev.routenotfound.com`
 - Hourly cron job (`0 * * * *`) to geocode pending waypoints
 - Wrangler handles TypeScript compilation automatically (no webpack needed)
+- Workers observability enabled with logs and traces (head sampling rate: 1.0)
 
 ## Architecture
 
@@ -93,6 +94,9 @@ Implemented in `src/lib/global.ts`:
 - `POST /trip` - Create or update trip (upsert, admin only)
 - `GET /trip/:id` - Get trip details with GeoJSON line
 - `DELETE /trip/:id` - Delete trip (admin only)
+
+**Specials and Side Projects:**
+- `GET /fifty_states` - Fifty states tracking endpoint
 
 ### Scheduled Tasks
 
