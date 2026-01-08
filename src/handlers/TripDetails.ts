@@ -7,11 +7,13 @@ import {
 } from '../lib/global';
 import { locationFilter } from '../lib/Filter';
 import { Query } from '../lib/Query';
+import type { Env } from '../index';
 
-async function getTrip(id: number): Promise<Trip | Error> {
+async function getTrip(id: number, env: Env): Promise<Trip | Error> {
   const query = new Query({
     endpoint: `/trips?id=eq.${id}`,
     single: true,
+    env,
   });
 
   return query.run().then((payload) => {
@@ -27,9 +29,9 @@ async function getTrip(id: number): Promise<Trip | Error> {
   });
 }
 
-export async function TripDetails(request: RNFRequest): Promise<Response> {
+export async function TripDetails(request: RNFRequest, env: Env): Promise<Response> {
   const id = parseInt(request.params.id);
-  const trip = await getTrip(id);
+  const trip = await getTrip(id, env);
 
   if (trip instanceof Error) {
     const [code, message] = trip.message?.split(': ');

@@ -1,8 +1,6 @@
 name = "rnf-location-service"
-main = "./src/index.ts"
-
-workers_dev = false
-compatibility_date = "2021-09-18"
+main = "src/index.ts"
+compatibility_date = "2024-11-26"
 
 route = { pattern = "api.routenotfound.com", custom_domain = true }
 
@@ -11,6 +9,17 @@ GMAPS_API_ENDPOINT = "https://maps.googleapis.com/maps/api/geocode/json"
 
 [triggers]
 crons = ["0 * * * *"]
+
+[observability]
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+invocation_logs = true
+persist = true
+[observability.traces]
+enabled = true
+head_sampling_rate = 1
+persist = true
 
 [env.dev]
 route = { pattern = "api.dev.routenotfound.com", custom_domain = true }

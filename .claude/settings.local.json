@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(test:*)",
+      "Bash(npm install)",
+      "Bash(npm audit:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run format:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm install:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nUpdate to modern TypeScript, Prettier, and ESLint versions\n\nUpdated core development dependencies to latest stable versions:\n- TypeScript 4.3.2 → 5.7.2\n- Prettier 2.3.2 → 3.3.3  \n- ESLint 7.21.0 → 9.15.0\n- @typescript-eslint packages 4.16.1 → 8.17.0\n- @cloudflare/workers-types 2.2.2 → 4.20241127.0\n\nCreated new configuration files for ESLint 9''s flat config format and webpack build process. Fixed TypeScript strict type checking issues and Cloudflare Workers type compatibility. Removed unused imports and added type guards for union types.\n\nAll lint checks pass and build succeeds.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(npm uninstall:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx wrangler deploy:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

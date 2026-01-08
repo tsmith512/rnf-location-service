@@ -7,12 +7,14 @@ import {
 } from '../lib/global';
 import { locationFilter } from '../lib/Filter';
 import { Query } from '../lib/Query';
+import type { Env } from '../index';
 
-async function getWaypointByTime(whattime: number): Promise<Waypoint | Error> {
+async function getWaypointByTime(whattime: number, env: Env): Promise<Waypoint | Error> {
   const query = new Query({
     endpoint: `/rpc/waypoint_by_time`,
     body: { whattime: whattime },
     single: true,
+    env,
   });
 
   return query.run().then((payload) => {
@@ -32,7 +34,7 @@ async function getWaypointByTime(whattime: number): Promise<Waypoint | Error> {
   });
 }
 
-export async function WaypointSearch(request: RNFRequest): Promise<Response> {
+export async function WaypointSearch(request: RNFRequest, env: Env): Promise<Response> {
   if (!isFinite(request.params?.whattime)) {
     return new Response(JSON.stringify({ message: 'Timestamp search must be numeric' }), {
       status: 404,
@@ -40,7 +42,7 @@ export async function WaypointSearch(request: RNFRequest): Promise<Response> {
     });
   }
 
-  const waypoint = await getWaypointByTime(parseInt(request.params.whattime));
+  const waypoint = await getWaypointByTime(parseInt(request.params.whattime), env);
 
   if (waypoint instanceof Error) {
     const [code, message] = waypoint.message?.split(': ');
@@ -52,8 +54,8 @@ export async function WaypointSearch(request: RNFRequest): Promise<Response> {
 
   // If this hasn't been geocoded yet, do it.
   if (waypoint.geocode_attempts == 0) {
-    await waypoint.geocode().then(() => {
-      waypoint.save();
+    await waypoint.geocode(env).then(() => {
+      waypoint.save(env);
     });
   }
 

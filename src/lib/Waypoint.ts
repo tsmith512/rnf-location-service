@@ -1,6 +1,7 @@
 import { Geocoder, GeocoderResponse } from './Geocoder';
 import { now } from './global';
 import { Query } from './Query';
+import type { Env } from '../index';
 
 export interface WaypointProps {
   timestamp: number;
@@ -43,9 +44,9 @@ export class Waypoint {
     return ago < 0 ? false : ago / 3600;
   }
 
-  async geocode(): Promise<boolean> {
+  async geocode(env: Env): Promise<boolean> {
     this.geocode_attempts++;
-    const geocoder = new Geocoder({ lon: this.lon, lat: this.lat });
+    const geocoder = new Geocoder({ lon: this.lon, lat: this.lat, env });
     const results = await geocoder.update();
 
     if (results instanceof Error) {
@@ -59,7 +60,7 @@ export class Waypoint {
     }
   }
 
-  async save(): Promise<true | Error> {
+  async save(env: Env): Promise<true | Error> {
     const payload = [
       {
         timestamp: this.timestamp,
@@ -78,6 +79,7 @@ export class Waypoint {
       single: true,
       upsert: true,
       body: payload,
+      env,
     });
 
     return query.run().then((payload) => {
@@ -99,7 +101,10 @@ export class Waypoint {
 // basically the same thing... except this one doesn't update the props on the
 // Waypoint objects because we don't necessarily know what order they'll come
 // back in
-export async function waypointBulkSave(waypoints: Waypoint[]): Promise<number | Error> {
+export async function waypointBulkSave(
+  waypoints: Waypoint[],
+  env: Env
+): Promise<number | Error> {
   const payload = [];
 
   for (const waypoint of waypoints) {
@@ -119,6 +124,7 @@ export async function waypointBulkSave(waypoints: Waypoint[]): Promise<number | 
     admin: true,
     upsert: true,
     body: payload,
+    env,
   });
 
   return query.run().then((payload) => {

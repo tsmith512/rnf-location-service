@@ -1,6 +1,9 @@
+import type { Env } from '../index';
+
 export interface GeocoderProps {
   lon: number;
   lat: number;
+  env: Env;
 }
 
 export interface AddressComponentPiece {
@@ -29,6 +32,7 @@ export interface GeocoderResponse {
 export class Geocoder {
   lon: number;
   lat: number;
+  env: Env;
 
   constructor(props: GeocoderProps) {
     Object.assign(this, props);
@@ -59,13 +63,13 @@ export class Geocoder {
 
   async fetchReverseGeo(): Promise<Record<string, unknown> | Error> {
     return fetch(
-      `${GMAPS_API_ENDPOINT}?latlng=${this.lat},${this.lon}&key=${GMAPS_API_KEY}`
+      `${this.env.GMAPS_API_ENDPOINT}?latlng=${this.lat},${this.lon}&key=${this.env.GMAPS_API_KEY}`
     )
       .then((response) => {
         return response.json();
       })
       .then((payload) => {
-        return payload;
+        return payload as Record<string, unknown>;
       })
       .catch((error) => {
         if (error instanceof SyntaxError) {

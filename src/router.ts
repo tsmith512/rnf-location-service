@@ -10,21 +10,23 @@ import {
   TripCreate,
   WaypointIndex,
   WaypointsPending,
+  FiftyStates,
 } from './handlers';
 import { authCheck, requireAdmin } from './lib/Auth';
 import { corsHeaders } from './lib/global';
 import { fillMissingGeocode } from './util';
+import type { Env } from './index';
 
 const router = Router();
 
 // Prepopulate "is this an admin?" for all requests
-router.all('*', authCheck);
+router.all('*', (request: Request, env: Env) => authCheck(request, env));
 
 // Waypoint related
 router.get('/waypoints', requireAdmin, WaypointIndex);
 router.get('/waypoints/pending', requireAdmin, WaypointsPending);
-router.get('/waypoints/pending/process', requireAdmin, () => {
-  return fillMissingGeocode(10);
+router.get('/waypoints/pending/process', requireAdmin, (_request: Request, env: Env) => {
+  return fillMissingGeocode(10, env);
 });
 router.post('/waypoint', requireAdmin, WaypointCreate);
 router.get('/waypoint', WaypointLatest);
@@ -33,8 +35,12 @@ router.get('/waypoint/:whattime', WaypointSearch);
 // Trip related
 router.get('/trips', TripIndex);
 router.post('/trip', requireAdmin, TripCreate);
+// @TODO: Differentiate post-new and patch-edit. Right now post will overwrite.
 router.get('/trip/:id', TripDetails);
 router.delete('/trip/:id', requireAdmin, TripDelete);
+
+// Specials and Side Projects
+router.get('/fifty_states', FiftyStates);
 
 // Options / Preflight
 router.options(
@@ -70,4 +76,5 @@ router.post(
     })
 );
 
-export const routeRequest = (request: Request): Response => router.handle(request);
+export const routeRequest = (request: Request, env: Env): Response | Promise<Response> =>
+  router.handle(request, env);
